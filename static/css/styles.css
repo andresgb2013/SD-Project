@@ -1,0 +1,113 @@
+/* Estilos para la página Home */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    position: relative; /* Asegura que el footer respete el espacio del contenido */
+    min-height: 100vh; /* Asegura que el cuerpo tenga al menos el alto de la ventana */
+}
+
+.container {
+    width: 80%;
+    margin: auto;
+    padding: 20px;
+}
+
+header {
+    background: #003580;
+    color: #ffffff;
+    padding: 20px 0;
+    text-align: center;
+}
+
+header .auth-links {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+header .auth-links a {
+    color: #ffffff;
+    margin-left: 15px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+#search {
+    background: #ffffff;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#search form {
+    display: block;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+#search select,
+#search input[type="text"],
+#search input[type="number"],
+#search input[type="submit"] {
+    display: inline-block; /* Muestra los elementos en línea */
+    vertical-align: middle; /* Alinea verticalmente */
+    margin: 3px; /* Espacio entre elementos */
+    padding: 10px;
+    font-size: 16px;
+    width: auto; /* Ancho automático basado en el contenido */
+}
+
+#destinations {
+    background: #ffffff;
+    padding: 20px;
+    margin-bottom: 100px; /* Ajusta este valor según sea necesario */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+footer {
+    background: #003580;
+    color: #ffffff;
+    text-align: center;
+    padding: 1px 0;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}
+
+.container-login {
+    width: 30%;
+    margin: auto;
+    overflow: hidden;
+    margin-top: 50px;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+h2 {
+    text-align: center;
+    color: #003580;
+}
+form {
+    display: flex;
+    flex-direction: column;
+}
+input[type="email"], input[type="password"], input[type="submit"] {
+    padding: 10px;
+    margin: 5px 0;
+    font-size: 16px;
+}
+input[type="checkbox"] {
+    margin: 10px 0;
+}
+a {
+    color: #003580;
+    text-decoration: none;
+    margin-top: 10px;
+    text-align: center;
+}

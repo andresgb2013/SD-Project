@@ -1,9 +1,12 @@
-from flask import Flask, render_template, redirect, url_for, request, flash
+from flask import Flask, render_template, redirect, url_for, request, flash, session
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
+import os
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
+app.secret_key = os.environ.get('SECRET_KEY', 'your_secret_key')
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -68,6 +71,73 @@ def logout():
 def home():
     return render_template('home.html')
 
-if __name__ == "__main__":
-    app.run(debug=True)
+@app.route('/booking', methods=['GET', 'POST'])
+def booking():
+    if request.method == 'POST':
+        # Obtener los datos del formulario
+        destination = request.form['destination']
+        check_in = request.form['check_in']
+        check_out = request.form['check_out']
+        guests = request.form['guests']
+        rooms = request.form['rooms']
 
+        # Almacenar los detalles de la reserva en la sesión
+        session['booking_details'] = {
+            'destination': destination,
+            'check_in': check_in,
+            'check_out': check_out,
+            'guests': guests,
+            'rooms': rooms
+        }
+
+        return redirect(url_for('booking'))  # Redirigir a la versión GET de booking para renderizar la página
+
+    # Si es una solicitud GET, obtener los detalles de la reserva de la sesión
+    booking_details = session.get('booking_details', {})
+
+    # Opciones de hotel para mostrar en la página
+    hotels = [
+        {
+            'name': 'Hotel Berlin',
+            'price': '€100 per night',
+            'image': url_for('static', filename='images/hotel1.jpg')
+        },
+        {
+            'name': 'Hotel Munich',
+            'price': '€120 per night',
+            'image': url_for('static', filename='images/hotel2.jpg')
+        },
+        {
+            'name': 'Hotel Hamburg',
+            'price': '€90 per night',
+            'image': url_for('static', filename='images/hotel3.jpg')
+        }
+    ]
+
+    return render_template('booking.html', booking_details=booking_details, hotels=hotels)
+
+
+
+@app.route('/confirmation', methods=['GET', 'POST'])
+def confirmation():
+    if request.method == 'POST':
+        # Procesar la confirmación de la reserva
+        hotel_name = request.form['hotel_name']
+        hotel_price = request.form['hotel_price']
+
+        # Añadir los detalles del hotel a los detalles de la reserva en la sesión
+        booking_details = session.get('booking_details', {})
+        booking_details['hotel_name'] = hotel_name
+        booking_details['hotel_price'] = hotel_price
+        session['booking_details'] = booking_details
+
+        flash('Booking confirmed!')
+        return redirect(url_for('confirmation'))
+
+    booking_details = session.get('booking_details', {})
+    return render_template('confirmation.html', booking_details=booking_details)
+
+
+
+if __name__ == '__main__':
+    app.run(debug=True)

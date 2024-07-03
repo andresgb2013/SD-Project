@@ -5,9 +5,10 @@ body {
     margin: 0;
     padding: 0;
     background-color: #f4f4f4;
-    position: relative; /* Asegura que el footer respete el espacio del contenido */
-    min-height: 100vh; /* Asegura que el cuerpo tenga al menos el alto de la ventana */
+    position: relative;
+    min-height: 100vh;
 }
+
 
 .container {
     width: 80%;
@@ -29,7 +30,7 @@ header .auth-links {
 }
 
 header .auth-links a {
-    color: #ffffff;
+    color: #003580;
     margin-left: 15px;
     text-decoration: none;
     font-weight: bold;
@@ -37,8 +38,8 @@ header .auth-links a {
 
 #search {
     background: #ffffff;
-    padding: 20px;
-    margin-bottom: 20px;
+    padding: 25px;
+    margin-bottom: 25px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
@@ -50,22 +51,12 @@ header .auth-links a {
     gap: 10px;
 }
 
-#search select,
-#search input[type="text"],
-#search input[type="number"],
-#search input[type="submit"] {
-    display: inline-block; /* Muestra los elementos en línea */
-    vertical-align: middle; /* Alinea verticalmente */
-    margin: 3px; /* Espacio entre elementos */
-    padding: 10px;
-    font-size: 16px;
-    width: auto; /* Ancho automático basado en el contenido */
-}
+
 
 #destinations {
     background: #ffffff;
     padding: 20px;
-    margin-bottom: 100px; /* Ajusta este valor según sea necesario */
+    margin-bottom: 100px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
@@ -79,6 +70,7 @@ footer {
     bottom: 0;
 }
 
+/*This is next section, Login*/
 .container-login {
     width: 30%;
     margin: auto;
@@ -89,22 +81,26 @@ footer {
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
+
 h2 {
     text-align: center;
     color: #003580;
 }
-form {
-    display: flex;
-    flex-direction: column;
-}
-input[type="email"], input[type="password"], input[type="submit"] {
+
+
+
+input[type="email"],
+input[type="password"],
+input[type="submit"] {
     padding: 10px;
     margin: 5px 0;
     font-size: 16px;
 }
+
 input[type="checkbox"] {
     margin: 10px 0;
 }
+
 a {
     color: #003580;
     text-decoration: none;

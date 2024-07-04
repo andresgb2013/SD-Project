@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, request, flash, session
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 
 app = Flask(__name__)
@@ -11,7 +11,6 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-# Example user class
 class User(UserMixin):
     def __init__(self, id, name, email, password):
         self.id = id
@@ -19,7 +18,6 @@ class User(UserMixin):
         self.email = email
         self.password = password
 
-# Example users dictionary
 users = {
     '1': User('1', 'Alice', 'alice@example.com', generate_password_hash('password')),
     '2': User('2', 'Bob', 'bob@example.com', generate_password_hash('password'))
@@ -39,7 +37,7 @@ def login():
         user = next((u for u in users.values() if u.email == email), None)
         if user and check_password_hash(user.password, password):
             login_user(user, remember=remember)
-            return redirect(url_for('home'))
+            return redirect(request.args.get('next') or url_for('home'))
         else:
             flash('Invalid credentials')
     return render_template('login.html')
@@ -65,7 +63,8 @@ def register():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('home'))
+    referrer = request.referrer or url_for('home')
+    return redirect(referrer)
 
 @app.route('/')
 def home():
@@ -74,69 +73,92 @@ def home():
 @app.route('/booking', methods=['GET', 'POST'])
 def booking():
     if request.method == 'POST':
-        # Obtener los datos del formulario
         destination = request.form['destination']
         check_in = request.form['check_in']
         check_out = request.form['check_out']
         guests = request.form['guests']
         rooms = request.form['rooms']
+        hotel_name = request.form.get('hotel_name')
 
-        # Almacenar los detalles de la reserva en la sesión
         session['booking_details'] = {
             'destination': destination,
             'check_in': check_in,
             'check_out': check_out,
             'guests': guests,
-            'rooms': rooms
+            'rooms': rooms,
+            'hotel_name': hotel_name
         }
 
-        return redirect(url_for('booking'))  # Redirigir a la versión GET de booking para renderizar la página
+        print("Booking details saved in session:", session['booking_details'])
 
-    # Si es una solicitud GET, obtener los detalles de la reserva de la sesión
+        if hotel_name:
+            return redirect(url_for('confirmation'))
+
     booking_details = session.get('booking_details', {})
+    print("Booking details retrieved from session:", booking_details)
 
-    # Opciones de hotel para mostrar en la página
-    hotels = [
-        {
-            'name': 'Hotel Berlin',
-            'price': '€100 per night',
-            'image': url_for('static', filename='images/hotel1.jpg')
-        },
-        {
-            'name': 'Hotel Munich',
-            'price': '€120 per night',
-            'image': url_for('static', filename='images/hotel2.jpg')
-        },
-        {
-            'name': 'Hotel Hamburg',
-            'price': '€90 per night',
-            'image': url_for('static', filename='images/hotel3.jpg')
-        }
-    ]
+    hotels_by_city = {
+        'Berlin': [
+            {'name': 'Hotel Berlin', 'price': '100', 'image': url_for('static', filename='images/hotel1.jpg')},
+            {'name': 'Berlin Hilton', 'price': '150', 'image': url_for('static', filename='images/hotel2.jpg')},
+            {'name': 'Berlin Marriott', 'price': '200', 'image': url_for('static', filename='images/hotel3.jpg')}
+        ],
+        'Munich': [
+            {'name': 'Munich International', 'price': '120', 'image': url_for('static', filename='images/hotel1.jpg')},
+            {'name': 'Munich Hilton', 'price': '170', 'image': url_for('static', filename='images/hotel2.jpg')},
+            {'name': 'Munich Marriott', 'price': '220', 'image': url_for('static', filename='images/hotel3.jpg')}
+        ],
+        'Hamburg': [
+            {'name': 'Hamburg Inn', 'price': '90', 'image': url_for('static', filename='images/hotel1.jpg')},
+            {'name': 'Hamburg Hilton', 'price': '140', 'image': url_for('static', filename='images/hotel2.jpg')},
+            {'name': 'Hamburg Marriott', 'price': '190', 'image': url_for('static', filename='images/hotel3.jpg')}
+        ]
+    }
+
+    destination = booking_details.get('destination')
+    hotels = hotels_by_city.get(destination, [])
 
     return render_template('booking.html', booking_details=booking_details, hotels=hotels)
 
 
-
 @app.route('/confirmation', methods=['GET', 'POST'])
+@login_required
 def confirmation():
     if request.method == 'POST':
-        # Procesar la confirmación de la reserva
         hotel_name = request.form['hotel_name']
-        hotel_price = request.form['hotel_price']
+        hotel_price = int(request.form['hotel_price'])
 
-        # Añadir los detalles del hotel a los detalles de la reserva en la sesión
         booking_details = session.get('booking_details', {})
+        check_in = datetime.strptime(booking_details['check_in'], '%Y-%m-%d')
+        check_out = datetime.strptime(booking_details['check_out'], '%Y-%m-%d')
+        num_nights = (check_out - check_in).days
+
+        total_price = hotel_price * num_nights
+
         booking_details['hotel_name'] = hotel_name
-        booking_details['hotel_price'] = hotel_price
+        booking_details['hotel_price'] = total_price
         session['booking_details'] = booking_details
 
         flash('Booking confirmed!')
         return redirect(url_for('confirmation'))
 
     booking_details = session.get('booking_details', {})
+    if not booking_details:
+        flash('No booking details found. Please start your booking again.')
+        return redirect(url_for('home'))
+
     return render_template('confirmation.html', booking_details=booking_details)
 
+
+@app.route('/confirm_booking', methods=['POST'])
+@login_required
+def confirm_booking():
+    if request.method == 'POST':
+        session['booking_confirmed'] = True
+        return redirect(url_for('confirmation'))
+
+    flash('Failed to confirm booking.')
+    return redirect(url_for('confirmation'))
 
 
 if __name__ == '__main__':

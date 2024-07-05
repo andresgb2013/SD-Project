@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super User Add Manager Page</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        .manager-container {
+            width: 50%;
+            margin: auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .manager-container .field-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px auto;
+        }
+        .manager-container input[type="text"], 
+        .manager-container input[type="password"] {
+            width: calc(80% - 20px);
+            padding: 10px;
+            margin-right: 10px;
+        }
+        .manager-container .button {
+            margin: 10px;
+        }
+        .button {
+            display: inline-block;
+            background: #e8491d;
+            color: #fff;
+            padding: 10px 20px;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            margin: 5px 0;
+        }
+        .small-btn {
+            display: inline-block;
+            text-align: center;
+            padding: 5px 10px;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="manager-container">
+        <form>
+            <div class="field-container">
+                <input type="text" id="name" name="name" placeholder="Name">
+                <button class="button small-btn" type="button" onclick="editField('name')">Edit</button>
+            </div>
+            <div class="field-container">
+                <input type="text" id="username" name="username" placeholder="Username">
+                <button class="button small-btn" type="button" onclick="editField('username')">Edit</button>
+            </div>
+            <div class="field-container">
+                <input type="password" id="password" name="password" placeholder="Password">
+                <button class="button small-btn" type="button" onclick="editField('password')">Edit</button>
+            </div>
+            <button class="button" type="button" onclick="saveManager()">Save</button>
+            <button class="button" type="button" onclick="deleteManager()">Delete</button>
+        </form>
+    </div>
+    <script>
+        function editField(fieldId) {
+            document.getElementById(fieldId).focus();
+        }
+
+        function saveManager() {
+            alert('Manager saved successfully!');
+            window.location.href = '/super_listing';
+        }
+
+        function deleteManager() {
+            alert('Manager deleted successfully!');
+            window.location.href = '/super_listing';
+        }
+    </script>
+</body>
+</html>

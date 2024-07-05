@@ -59,5 +59,41 @@
         <li class="list-group-item">Hamburg</li>
         <li class="list-group-item">Frankfurt</li>
     </ul>
+    
 </section>
+<!-- Script para inicializar los selectores de fechas -->
+<script>
+    $(function () {
+        var dateFormat = "yy-mm-dd",
+            from = $("#check-in")
+                .datepicker({
+                    defaultDate: "+1w",
+                    changeMonth: true,
+                    numberOfMonths: 1,
+                    dateFormat: dateFormat
+                })
+                .on("change", function () {
+                    to.datepicker("option", "minDate", getDate(this));
+                }),
+            to = $("#check-out").datepicker({
+                defaultDate: "+1w",
+                changeMonth: true,
+                numberOfMonths: 1,
+                dateFormat: dateFormat
+            })
+                .on("change", function () {
+                    from.datepicker("option", "maxDate", getDate(this));
+                });
+
+        function getDate(element) {
+            var date;
+            try {
+                date = $.datepicker.parseDate(dateFormat, element.value);
+            } catch (error) {
+                date = null;
+            }
+            return date;
+        }
+    });
+</script>
 {% endblock %}

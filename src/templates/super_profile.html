@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Super User Profile - Travel Booking{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 class="card-title">Super User Profile</h3>
+                    <div class="profile-container">
+                        <div class="nav-buttons mb-3">
+                            <button class="btn btn-primary mx-2" onclick="window.location.href='/super_profile'">My Profile</button>
+                            <button class="btn btn-secondary mx-2" onclick="window.location.href='/super_listing'">Actions</button>
+                        </div>
+                        <form>
+                            <div class="mb-3 field-container d-flex justify-content-center align-items-center">
+                                <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
+                                <button class="btn btn-outline-primary small-btn mx-2" type="button" onclick="editField('username')">Edit</button>
+                            </div>
+                            <div class="mb-3 field-container d-flex justify-content-center align-items-center">
+                                <input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
+                                <button class="btn btn-outline-primary small-btn mx-2" type="button" onclick="editField('email')">Edit</button>
+                            </div>
+                            <div class="mb-3 field-container d-flex justify-content-center align-items-center">
+                                <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                                <button class="btn btn-outline-primary small-btn mx-2" type="button" onclick="editField('password')">Edit</button>
+                            </div>
+                        </form>
+                        <div class="logout mt-4">
+                            <button class="btn btn-primary mx-2" type="submit" onclick="saveProfile()">Save</button>
+                            <button class="btn btn-danger mx-2" onclick="window.location.href='/login'">Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function editField(fieldId) {
+        document.getElementById(fieldId).focus();
+    }
+
+    function saveProfile() {
+        alert('Profile saved successfully!');
+        window.location.href = '/super_profile';
+    }
+</script>
+{% endblock %}

@@ -3,6 +3,9 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 import os
+import pymongo
+from bson.objectid import ObjectId
+
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'your_secret_key')
@@ -11,33 +14,54 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-class User(UserMixin):
-    def __init__(self, id, name, email, password):
-        self.id = id
-        self.name = name
-        self.email = email
-        self.password = password
 
-users = {
-    '1': User('1', 'Alice', 'alice@example.com', generate_password_hash('password')),
-    '2': User('2', 'Bob', 'bob@example.com', generate_password_hash('password'))
-}
+# Configuración de la conexión a MongoDB
+client = pymongo.MongoClient('mongodb+srv://andresgb2013:DN0kJdOtj5eJmoo3@cluster0.jzfu1jp.mongodb.net/')
+db = client['SD_Project']  # Reemplaza 'your_database_name' con el nombre de tu base de datos
+users_collection = db['users']
+hotels_collection = db['hotels']
+
+
+
+class User(UserMixin):
+    def __init__(self, user_id, name,lastname, email, password_hash, auth_level):
+        self.id = user_id
+        self.name = name
+        self.lastname = lastname
+        self.email = email
+        self.password_hash = password_hash
+        self.auth_level = auth_level
+
+    @staticmethod
+    def from_mongo(doc):
+        return User(
+            user_id=str(doc['_id']),
+            name=doc['name'],
+            lastname=doc['lastname'],
+            email=doc['email'],
+            password_hash=doc['password_hash'],
+            auth_level=doc['auth_level']
+        )
+
 
 @login_manager.user_loader
 def load_user(user_id):
-    return users.get(user_id)
+    user_doc = users_collection.find_one({'_id': ObjectId(user_id)})
+    if user_doc:
+        return User.from_mongo(user_doc)
+    return None
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        remember = 'remember' in request.form
 
-        user = next((u for u in users.values() if u.email == email), None)
-        if user and check_password_hash(user.password, password):
-            login_user(user, remember=remember)
-            return redirect(request.args.get('next') or url_for('home'))
+        user_doc = users_collection.find_one({'email': email})
+        if user_doc and check_password_hash(user_doc['password_hash'], password):
+            user = User.from_mongo(user_doc)
+            login_user(user)
+            return redirect(url_for('home'))
         else:
             flash('Invalid credentials')
     return render_template('login.html')
@@ -46,16 +70,23 @@ def login():
 def register():
     if request.method == 'POST':
         name = request.form['name']
+        lastName = request.form['lastname']
         email = request.form['email']
         password = request.form['password']
 
-        if next((u for u in users.values() if u.email == email), None):
+        existing_user = users_collection.find_one({'email': email})
+        if existing_user:
             flash('Email address already registered')
         else:
-            user_id = str(len(users) + 1)
-            new_user = User(user_id, name, email, generate_password_hash(password))
-            users[user_id] = new_user
-            login_user(new_user)
+            user_data = {
+                'name': name,
+                'lastname': lastName,
+                'email': email,
+                'password_hash': generate_password_hash(password),
+                'auth_level': 'regular'  # Valor predeterminado
+            }
+            users_collection.insert_one(user_data)
+            flash('User registered successfully')
             return redirect(url_for('home'))
     return render_template('register.html')
 
@@ -63,8 +94,8 @@ def register():
 @login_required
 def logout():
     logout_user()
-    referrer = request.referrer or url_for('home')
-    return redirect(referrer)
+    return redirect(url_for('home'))
+
 
 @app.route('/')
 def home():
@@ -159,6 +190,11 @@ def confirm_booking():
 
     flash('Failed to confirm booking.')
     return redirect(url_for('confirmation'))
+
+
+@app.route('/super_profile')
+def super_profile():
+    return render_template('super_profile.html')
 
 
 if __name__ == '__main__':

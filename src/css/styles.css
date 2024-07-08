@@ -7,6 +7,7 @@ body {
     background-color: #f4f4f4;
     position: relative;
     min-height: 100vh;
+    
 }
 
 
@@ -14,6 +15,7 @@ body {
     width: 80%;
     margin: auto;
     padding: 20px;
+    align-items: center;
 }
 
 header {
@@ -41,16 +43,16 @@ header .auth-links a {
     padding: 25px;
     margin-bottom: 25px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    align-items: center;
 }
 
 #search form {
     display: block;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: center;
     align-items: center;
     gap: 10px;
 }
-
 
 
 #destinations {
@@ -80,13 +82,13 @@ footer {
     background: #ffffff;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    align-items: center;
 }
 
 h2 {
     text-align: center;
     color: #003580;
 }
-
 
 
 input[type="email"],
@@ -107,3 +109,56 @@ a {
     margin-top: 10px;
     text-align: center;
 }
+
+
+
+.profile-container {
+    width: 50%;
+    margin: auto;
+    padding: 20px;
+    text-align: center;
+}
+.profile-container .field-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 10px auto;
+}
+.profile-container input[type="text"], 
+.profile-container input[type="email"], 
+.profile-container input[type="password"] {
+    width: calc(80% - 20px);
+    padding: 10px;
+    margin-right: 10px;
+}
+.profile-container .button {
+    margin: 10px;
+}
+.profile-container .nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin: 15 0;
+}
+.button {
+    display: block;
+    background: #003580;
+    color: #fff;
+    padding: 10px 20px;
+    text-align: center;
+    cursor: pointer;
+    border: none;
+    margin: 5px 0;
+    align-items: center;
+}
+.small-btn {
+    align-items:center;
+    display:flex;
+    text-align: center;
+    padding: 5px 10px;
+    margin: 0;
+}
+.action-btn {
+    width: 100%;
+    max-width: 200px;
+}
+

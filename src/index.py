@@ -56,15 +56,22 @@ def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-
+        
         user_doc = users_collection.find_one({'email': email})
         if user_doc and check_password_hash(user_doc['password_hash'], password):
             user = User.from_mongo(user_doc)
             login_user(user)
-            return redirect(url_for('home'))
+            
+            if user.auth_level == 'super_user':
+                return redirect(url_for('super_profile'))
+            elif user.auth_level == 'manager_user':
+                return redirect(url_for('manager_profile'))
+            else:
+                return redirect(url_for('home'))
         else:
             flash('Invalid credentials')
     return render_template('login.html')
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -73,10 +80,13 @@ def register():
         lastName = request.form['lastname']
         email = request.form['email']
         password = request.form['password']
+        confirm_password = request.form['confirm_password']
 
         existing_user = users_collection.find_one({'email': email})
         if existing_user:
-            flash('Email address already registered')
+            flash('Email address already registered', 'error')
+        elif password!= confirm_password:
+            flash('Passwords do not match', 'error')
         else:
             user_data = {
                 'name': name,

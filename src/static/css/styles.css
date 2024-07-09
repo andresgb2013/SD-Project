@@ -152,7 +152,7 @@ a {
 }
 .small-btn {
     align-items:center;
-    display:flex;
+    display:block;
     text-align: center;
     padding: 5px 10px;
     margin: 0;

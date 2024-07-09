@@ -4,7 +4,8 @@
 {% block title %}Home - Trip Booking{% endblock %}
 
 {% block additional_css %}
-<!-- CSS adicional para la página home -->
+<!-- Incluir CSS de jQuery UI -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 {% endblock %}
 
 {% block header_title %}Welcome to Trip Booking{% endblock %}
@@ -22,9 +23,7 @@
 {% block content %}
 <section id="search">
     <h2 class="h4 mb-3">Find Your Next Adventure</h2>
-    <!-- home.html -->
-    <form class="d-flex flex-wrap justify-content-center align-items-center" action="{{ url_for('booking') }}"
-        method="POST">
+    <form class="d-flex flex-wrap justify-content-center align-items-center" action="{{ url_for('booking') }}" method="POST">
         <div class="col-md-3">
             <select class="form-select" name="destination" required>
                 <option value="">Select Destination</option>
@@ -59,9 +58,13 @@
         <li class="list-group-item">Hamburg</li>
         <li class="list-group-item">Frankfurt</li>
     </ul>
-    
 </section>
-<!-- Script para inicializar los selectores de fechas -->
+{% endblock %}
+
+{% block additional_js %}
+<!-- Incluir jQuery y jQuery UI -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <script>
     $(function () {
         var dateFormat = "yy-mm-dd",
@@ -77,9 +80,9 @@
                 }),
             to = $("#check-out").datepicker({
                 defaultDate: "+1w",
-                changeMonth: true,
-                numberOfMonths: 1,
-                dateFormat: dateFormat
+                    changeMonth: true,
+                    numberOfMonths: 1,
+                    dateFormat: dateFormat
             })
                 .on("change", function () {
                     from.datepicker("option", "maxDate", getDate(this));

@@ -15,7 +15,12 @@
 <body>
     <header class="bg-primary text-white py-3">
         <div class="container d-flex justify-content-between align-items-center">
-            <h1 class="h3">{% block header_title %}Trip Booking{% endblock %}</h1>
+            <h1 class="h3">
+                <a href="{{ url_for('home') }}" class="text-white text-decoration-none">
+                    {% block header_title %}Trip Booking{% endblock %}
+                </a>
+            </h1>
+            {% if request.endpoint not in ['login', 'register'] %}
             <div class="auth-links">
                 {% block auth_links %}
                 {% if current_user.is_authenticated %}
@@ -27,6 +32,8 @@
                 {% endif %}
                 {% endblock %}
             </div>
+            {% endif %}
+
         </div>
     </header>
 

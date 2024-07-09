@@ -206,6 +206,21 @@ def confirm_booking():
 def super_profile():
     return render_template('super_profile.html')
 
+@app.route('/super_listing')
+def super_listing():
+    # Sample data for managers and cities
+    managers = [{'name': 'John Doe', 'details': 'Manager of City A'}]
+    cities = [{'name': 'City A', 'details': 'Details of City A'}]
+    return render_template('super_listing.html', managers=managers, cities=cities)
+
+@app.route('/super_add_city')
+def super_add_city():
+    return render_template('super_add_city.html')
+
+@app.route('/super_add_manager')
+def super_add_manager():
+    return render_template('super_add_manager.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)

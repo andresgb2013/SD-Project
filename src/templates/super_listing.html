@@ -1,5 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
+
+{% block title %}Super Listing - Travel Booking{% endblock %}
+
+{% block content %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -53,7 +56,7 @@
         }
     </style>
 </head>
-<body>
+
     <div class="listing-container">
         <div class="button-container">
           <button class="button" onclick="window.location.href='/super-profile'">My profile</button>
@@ -69,5 +72,5 @@
             <button class="edit-btn" onclick="window.location.href='/super_add_city'">Edit</button>
         </div>
     </div>
-</body>
-</html>
+
+{% endblock %}

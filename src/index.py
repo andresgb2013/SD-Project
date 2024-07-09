@@ -85,6 +85,10 @@ def register():
         existing_user = users_collection.find_one({'email': email})
         if existing_user:
             flash('Email address already registered', 'error')
+                # Validar longitud mínima de contraseña
+        elif len(password) < 8:
+            flash('Password must be at least 8 characters long', 'error')
+            return redirect(url_for('register'))
         elif password!= confirm_password:
             flash('Passwords do not match', 'error')
         else:
@@ -220,6 +224,7 @@ def super_add_city():
 @app.route('/super_add_manager')
 def super_add_manager():
     return render_template('super_add_manager.html')
+
 
 
 if __name__ == '__main__':

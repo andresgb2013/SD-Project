@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Super Add City - Travel Booking{% endblock %}
+
+{% block content %}
+
+<style>
+    .city-container {
+        width: 50%;
+        margin: auto;
+        padding: 20px;
+        text-align: center;
+    }
+    .city-container .field-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 10px auto;
+    }
+    .city-container input[type="text"] {
+        width: calc(80% - 20px);
+        padding: 10px;
+        margin-right: 10px;
+    }
+    .city-container .button {
+        margin: 10px;
+    }
+    .button {
+        display: inline-block;
+        background: #e8491d;
+        color: #fff;
+        padding: 10px 20px;
+        text-align: center;
+        cursor: pointer;
+        border: none;
+        margin: 5px 0;
+    }
+    .small-btn {
+        display: inline-block;
+        text-align: center;
+        padding: 5px 10px;
+        margin: 0;
+    }
+</style>
+</head>
+<body>
+<div class="city-container">
+    <form>
+        <div class="field-container">
+            <input type="text" id="name" name="name" placeholder="Name">
+            <button class="button small-btn" type="button" onclick="editField('name')">Edit</button>
+        </div>
+        <div class="field-container">
+            <input type="text" id="postal_code" name="postal_code" placeholder="Postal Code">
+            <button class="button small-btn" type="button" onclick="editField('postal_code')">Edit</button>
+        </div>
+        <div class="field-container">
+            <input type="text" id="country" name="country" placeholder="Country">
+            <button class="button small-btn" type="button" onclick="editField('country')">Edit</button>
+        </div>
+        <button class="button" type="button" onclick="saveCity()">Save</button>
+        <button class="button" type="button" onclick="deleteCity()">Delete</button>
+    </form>
+</div>
+<script>
+    function editField(fieldId) {
+        document.getElementById(fieldId).focus();
+    }
+
+    function saveCity() {
+        alert('City saved successfully!');
+        window.location.href = '/super_listing';
+    }
+
+    function deleteCity() {
+        alert('City deleted successfully!');
+        window.location.href = '/super_listing';
+    }
+</script>
+

@@ -3,32 +3,32 @@
 {% block title %}Super Add Manager - Travel Booking{% endblock %}
 
 {% block content %}
-<head>
+    
     <style>
-        .manager-container {
+        .profile-container {
             width: 50%;
             margin: auto;
             padding: 20px;
             text-align: center;
         }
-        .manager-container .field-container {
+        .profile-container .field-container {
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 10px auto;
         }
-        .manager-container input[type="text"], 
-        .manager-container input[type="password"] {
+        .profile-container input[type="text"], 
+        .profile-container input[type="password"] {
             width: calc(80% - 20px);
             padding: 10px;
             margin-right: 10px;
         }
-        .manager-container .button {
+        .profile-container .button {
             margin: 10px;
         }
         .button {
             display: inline-block;
-            background: #003580;
+            background: #e8491d;
             color: #fff;
             padding: 10px 20px;
             text-align: center;
@@ -43,16 +43,16 @@
             margin: 0;
         }
     </style>
-</head>
+
 <div class="row justify-content-center">
     <div class="col-md-10">
         <div class="card">
-            <div class="manager-container">
+            <div class="profile-container">
+                <div class="field-container">
+                    <button class="btn btn-primary mx-2" onclick="window.location.href='/manager_profile'">My profile</button>
+                    <button class="btn btn-primary mx-2" onclick="window.location.href='/manager_list'">My List</button>
+                </div>
                 <form>
-                    <div class="field-container">
-                        <input type="text" id="name" name="name" placeholder="Name">
-                        <button class="btn btn-primary mx-2" type="button" onclick="editField('name')">Edit</button>
-                    </div>
                     <div class="field-container">
                         <input type="text" id="username" name="username" placeholder="Username">
                         <button class="btn btn-primary mx-2" type="button" onclick="editField('username')">Edit</button>
@@ -61,9 +61,11 @@
                         <input type="password" id="password" name="password" placeholder="Password">
                         <button class="btn btn-primary mx-2" type="button" onclick="editField('password')">Edit</button>
                     </div>
-                    <button class="btn btn-primary mx-2" type="button" onclick="saveManager()">Save</button>
-                    <button class="btn btn-danger mx-2" type="button" onclick="deleteManager()">Delete</button>
+                    <button class="btn btn-primary mx-2" type="button" onclick="saveProfile()">Save</button>
                 </form>
+                <div class="logout">
+                    <button class="btn btn-danger mx-2" onclick="logout()">Logout</button>
+                </div>
             </div>
         </div>
     </div>
@@ -73,14 +75,14 @@
         document.getElementById(fieldId).focus();
     }
 
-    function saveManager() {
-        alert('Manager saved successfully!');
-        window.location.href = '/super_listing';
+    function saveProfile() {
+        alert('Profile saved successfully!');
+        window.location.href = '/manager_profile';
     }
 
-    function deleteManager() {
-        alert('Manager deleted successfully!');
-        window.location.href = '/super_listing';
+    function logout() {
+        alert('You have been logged out!');
+        window.location.href = '/login';
     }
 </script>
 

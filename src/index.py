@@ -205,6 +205,17 @@ def confirm_booking():
     flash('Failed to confirm booking.')
     return redirect(url_for('confirmation'))
 
+@app.route('/manager_profile')
+def manager_profile():
+    return render_template('manager_profile.html')
+
+@app.route('/manager_listing')
+def manager_listing():
+    return render_template('manager_listing.html')
+
+@app.route('/manager_hotel_editing')
+def manager_hotel_editing():
+    return render_template('manager_hotel_editing.html')
 
 @app.route('/super_profile')
 def super_profile():

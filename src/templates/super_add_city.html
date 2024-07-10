@@ -27,7 +27,7 @@
     }
     .button {
         display: inline-block;
-        background: #e8491d;
+        background: #003580;
         color: #fff;
         padding: 10px 20px;
         text-align: center;
@@ -42,25 +42,30 @@
         margin: 0;
     }
 </style>
-</head>
-<body>
-<div class="city-container">
-    <form>
-        <div class="field-container">
-            <input type="text" id="name" name="name" placeholder="Name">
-            <button class="button small-btn" type="button" onclick="editField('name')">Edit</button>
+
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="city-container">
+                <form>
+                    <div class="field-container">
+                        <input type="text" id="name" name="name" placeholder="Name">
+                        <button class="btn btn-primary mx-2" type="button" onclick="editField('name')">Edit</button>
+                    </div>
+                    <div class="field-container">
+                        <input type="text" id="postal_code" name="postal_code" placeholder="Postal Code">
+                        <button class="btn btn-primary mx-2" type="button" onclick="editField('postal_code')">Edit</button>
+                    </div>
+                    <div class="field-container">
+                        <input type="text" id="country" name="country" placeholder="Country">
+                        <button class="btn btn-primary mx-2" type="button" onclick="editField('country')">Edit</button>
+                    </div>
+                    <button class="btn btn-primary mx-2" type="button" onclick="saveCity()">Save</button>
+                    <button class="btn btn-danger mx-2" type="button" onclick="deleteCity()">Delete</button>
+                </form>
+            </div>
         </div>
-        <div class="field-container">
-            <input type="text" id="postal_code" name="postal_code" placeholder="Postal Code">
-            <button class="button small-btn" type="button" onclick="editField('postal_code')">Edit</button>
-        </div>
-        <div class="field-container">
-            <input type="text" id="country" name="country" placeholder="Country">
-            <button class="button small-btn" type="button" onclick="editField('country')">Edit</button>
-        </div>
-        <button class="button" type="button" onclick="saveCity()">Save</button>
-        <button class="button" type="button" onclick="deleteCity()">Delete</button>
-    </form>
+    </div>
 </div>
 <script>
     function editField(fieldId) {

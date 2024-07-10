@@ -3,74 +3,75 @@
 {% block title %}Super Listing - Travel Booking{% endblock %}
 
 {% block content %}
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super User Listing Page</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <style>
-        .listing-container {
-            width: 50%;
-            margin: auto;
-            padding: 20px;
-            text-align: center;
-        }
-        .listing-container .button-container {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 20px;
-        }
-        .listing-container .entry-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 10px auto;
-            padding: 10px;
-            border: 1px solid #000;
-            border-radius: 5px;
-            width: 80%;
-        }
-        .listing-container .entry-container p {
-            flex: 1;
-            text-align: left;
-            margin-left: 20px;
-        }
-        .listing-container .entry-container .edit-btn {
-            margin-left: 10px;
-            padding: 5px 10px;
-            cursor: pointer;
-            background-color: #e8491d;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-        }
-        .button{
-          display: inline-block;
-            background: #e8491d;
-            color: #fff;
-            padding: 10px 20px;
-            text-align: center;
-            cursor: pointer;
-            border: none;
-            margin: 5px 0;
-        }
-    </style>
-</head>
 
-    <div class="listing-container">
-        <div class="button-container">
-          <button class="button" onclick="window.location.href='/super-profile'">My profile</button>
-          <button class="button" onclick="window.location.href='/super_add_city'">Add City</button>
-          <button class="button" onclick="window.location.href='/super_add_manager'">Add Manager</button>
-        </div>
-        <div class="entry-container">
-            <p>Manager Name:<br>Details:</p>
-            <button class="edit-btn" onclick="window.location.href='/super_add_manager'">Edit</button>
-        </div>
-        <div class="entry-container">
-            <p>City Name:<br>Details:</p>
-            <button class="edit-btn" onclick="window.location.href='/super_add_city'">Edit</button>
+<style>
+    .listing-container {
+        width: 70%;
+        margin: auto;
+        padding: 20px;
+        text-align: center;
+    }
+    .listing-container .button-container {
+        display: flex;
+        justify-content: space-around;
+        margin-bottom: 20px;
+    }
+    .listing-container .entry-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 10px auto;
+        padding: 10px;
+        border: 1px solid #000;
+        border-radius: 5px;
+        width: 80%;
+    }
+    .listing-container .entry-container p {
+        flex: 1;
+        text-align: left;
+        margin-left: 20px;
+    }
+    .listing-container .entry-container .edit-btn {
+        margin-left: 10px;
+        padding: 5px 10px;
+        cursor: pointer;
+        background-color: #003580;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+    }
+    .button{
+        display: inline-block;
+        background: #003580;
+        color: #fff;
+        padding: 10px 20px;
+        text-align: center;
+        cursor: pointer;
+        border: none;
+        margin: 5px 0;
+    }
+</style>
+
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="listing-container">
+                <div class="button-container">
+                <button class="btn btn-primary mx-2" onclick="window.location.href='/super_profile'">My profile</button>
+                <button class="btn btn-primary mx-2" onclick="window.location.href='/super_add_city'">Add City</button>
+                <button class="btn btn-primary mx-2" onclick="window.location.href='/super_add_manager'">Add Manager</button>
+                </div>
+                <div class="entry-container">
+                    <p>Manager Name:<br>Details:</p>
+                    <button class="btn btn-primary mx-2" onclick="window.location.href='/super_add_manager'">Edit</button>
+                </div>
+                <div class="entry-container">
+                    <p>City Name:<br>Details:</p>
+                    <button class="btn btn-primary mx-2" onclick="window.location.href='/super_add_city'">Edit</button>
+                </div>
+            </div>
         </div>
     </div>
+</div>
 
 {% endblock %}

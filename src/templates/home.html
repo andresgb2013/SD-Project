@@ -12,7 +12,7 @@
 
 {% block auth_links %}
 {% if current_user.is_authenticated %}
-<span>Welcome, {{ current_user.name }}!</span>
+<a href="{{ url_for('user_profile') }}">Welcome, {{ current_user.name }}!</a>
 <a href="{{ url_for('logout') }}" class="btn btn-light btn-sm btn-custom">Logout</a>
 {% else %}
 <a href="{{ url_for('login') }}" class="btn btn-light btn-sm btn-custom">Login</a>

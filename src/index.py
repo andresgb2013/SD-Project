@@ -110,10 +110,45 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
+@app.route('/user_profile')
+def user_profile():
+    if session.get('authenticated'):
+        return redirect(url_for('login'))
+    return render_template('user_profile.html')
+
+@app.route('/user_booking')
+def user_booking():
+    if session.get('authenticated'):
+        return redirect(url_for('login'))
+    return render_template('user_booking.html')
+
+@app.route('/booking_cancel')
+def booking_cancel():
+    if session.get('authenticated'):
+        return redirect(url_for('login'))
+    return render_template('booking_cancel.html')
 
 @app.route('/')
 def home():
     return render_template('home.html')
+
+@app.route('/hotel_info/<hotel_name>', methods=['GET', 'POST'])
+def hotel_info(hotel_name):
+    if not session.get('authenticated'):
+        return redirect(url_for('login'))
+    # Dummy data for example
+    hotel = {
+        'name': hotel_name,
+        'city': 'Example City',
+        'country': 'Example Country',
+        'description': 'This is a beautiful hotel.',
+        'price': 150,
+        'distance_from_center': 2,
+        'image1': 'path/to/room_image1.jpg',  # Update as necessary
+        'image2': 'path/to/room_image2.jpg',  # Update as necessary
+        'image3': 'path/to/room_image3.jpg'   # Update as necessary
+    }
+    return render_template('hotel_info.html', hotel=hotel)
 
 @app.route('/booking', methods=['GET', 'POST'])
 def booking():

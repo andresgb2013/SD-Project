@@ -1,5 +1,5 @@
 <!-- confirmation.html -->
-{% extends 'base.html' %}
+{% extends 'home.html' %}
 
 {% block title %}Booking Confirmation - Trip Booking{% endblock %}
 
@@ -23,7 +23,7 @@
     <form action="{{ url_for('confirm_booking') }}" method="POST">
         <input type="hidden" name="hotel_name" value="{{ booking_details.hotel_name }}">
         <input type="hidden" name="hotel_price" value="{{ booking_details.hotel_price }}">
-        <button type="submit" class="btn btn-primary">Confirm Booking</button>
+        <button type="submit" class="btn btn-primary " onclick="confirmBooking()">Confirm Booking</button>
     </form>
     {% else %}
     <div class="alert alert-warning" role="alert">
@@ -40,4 +40,13 @@
     </div>
     {% endif %}
 </div>
+
+<script>
+    function confirmBooking() {
+        event.preventDefault(); // Prevent form from submitting the traditional way
+        alert('Booking confirmed successfully!');
+        document.getElementById('confirm-form').submit(); // Submit the form after the alert
+    }
+</script>
+
 {% endblock %}

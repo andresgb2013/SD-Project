@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}User Booking - Travel Booking{% endblock %}
+
+{% block content %}
+
+<head>
+    <style>
+        .booking-container {
+            width: 50%;
+            margin: auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .booking-container .nav-buttons {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .booking-container .booking-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 10px auto;
+            padding: 10px;
+            border: 1px solid #000;
+            border-radius: 5px;
+            width: 100%;
+            cursor: pointer;
+        }
+        .booking-container .booking-card img {
+            width: 100px;
+            height: 100px;
+            margin-right: 20px;
+        }
+        .booking-container .booking-card .details {
+            flex: 1;
+            text-align: left;
+        }
+        .booking-container .booking-card .details h4 {
+            margin: 0;
+        }
+    </style>
+</head>
+
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="booking-container">
+                <div class="nav-buttons">
+                    <button class="btn btn-primary mx-2" onclick="window.location.href='/user_profile'">My Profile</button>
+                    <button class="btn btn-primary mx-2" onclick="window.location.href='/user_booking'">My Booking</button>
+                </div>
+                <div class="booking-card" onclick="window.location.href='/booking_cancel'">
+                    <img src="hotel_image.jpg" alt="Hotel Image">
+                    <div class="details">
+                        <h4>Hotel 1</h4>
+                        <p>Details:</p>
+                        <ul>
+                            <li>Name of hotel</li>
+                            <li>Number of Nights</li>
+                            <li>Date</li>
+                            <li>Price</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

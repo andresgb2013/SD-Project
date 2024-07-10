@@ -1,0 +1,75 @@
+{% extends 'home.html' %}
+
+{% block title %}Hotel Info - Trip Booking{% endblock %}
+
+{% block content %}
+<head>
+    <style>
+        .info-container {
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .info-container .hotel-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .info-container .hotel-details .image-section,
+        .info-container .hotel-details .details-section {
+            width: 48%;
+        }
+        .info-container .hotel-details .image-section img {
+            width: 100%;
+            height: auto;
+        }
+        .info-container .price-box {
+            border: 1px solid #000;
+            border-radius: 5px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        .info-container .price-box input {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<div class="info-container">
+    <div class="hotel-details">
+        <div class="image-section">
+            <img src="{{ hotel.image1 }}" alt="Room Image 1">
+            <img src="{{ hotel.image2 }}" alt="Room Image 2">
+            <img src="{{ hotel.image3 }}" alt="Room Image 3">
+        </div>
+        <div class="details-section">
+            <h2>{{ hotel.name }}</h2>
+            <p>{{ hotel.city }}, {{ hotel.country }}</p>
+            <p>{{ hotel.description }}</p>
+        </div>
+    </div>
+    {% if current_user.is_authenticated %}
+    <div class="price-box">
+        <h3>Price ${{ hotel.price }} per Night</h3>
+        <label for="check_in">Check in</label>
+        <input type="date" id="check_in" name="check_in" required>
+        <label for="check_out">Check out</label>
+        <input type="date" id="check_out" name="check_out" required>
+        <label for="guests">Number of Guests</label>
+        <input type="number" id="guests" name="guests" min="1" required>
+        <p>Distance from City Center: {{ hotel.distance_from_center }} km</p>
+        <button class="btn btn-danger" onclick="bookNow()">Book Now</button>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    function bookNow() {
+        alert('Booking confirmed!');
+        window.location.href = '/user_booking';
+    }
+</script>
+{% endblock %}

@@ -20,6 +20,9 @@ client = pymongo.MongoClient('mongodb+srv://andresgb2013:DN0kJdOtj5eJmoo3@cluste
 db = client['SD_Project']  # Reemplaza 'your_database_name' con el nombre de tu base de datos
 users_collection = db['users']
 hotels_collection = db['hotels']
+super_user_collection = db['super_user']
+city_collection = db['city']
+manager_collection = db['manager']
 
 
 
@@ -43,6 +46,21 @@ class User(UserMixin):
             auth_level=doc['auth_level']
         )
 
+@app.route('/add_city', methods=['POST'])
+def add_city():
+    name = request.form['name']
+    postal_code = request.form['postal_code']
+    country = request.form['country']
+    add_city(name, postal_code, country)
+    return redirect(url_for('super_listing'))
+
+@app.route('/add_manager', methods=['POST'])
+def add_manager():
+    name = request.form['name']
+    username = request.form['username']
+    password = request.form['password']
+    add_manager(name, username, password)
+    return redirect(url_for('super_listing'))
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -104,11 +122,13 @@ def register():
             return redirect(url_for('home'))
     return render_template('register.html')
 
+
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('home'))
+
 
 @app.route('/user_profile')
 def user_profile():
@@ -127,6 +147,7 @@ def booking_cancel():
     if session.get('authenticated'):
         return redirect(url_for('login'))
     return render_template('booking_cancel.html')
+
 
 @app.route('/')
 def home():
@@ -154,7 +175,7 @@ def booking():
         print("Booking details saved in session:", session['booking_details'])
 
         if hotel_name:
-            return redirect(url_for('confirmation'))
+            return redirect(url_for('hotel_info/<hotel_name>'))
 
     booking_details = session.get('booking_details', {})
     print("Booking details retrieved from session:", booking_details)

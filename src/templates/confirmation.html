@@ -45,6 +45,7 @@
     function confirmBooking() {
         event.preventDefault(); // Prevent form from submitting the traditional way
         alert('Booking confirmed successfully!');
+        window.location.href = '/user_booking';
         document.getElementById('confirm-form').submit(); // Submit the form after the alert
     }
 </script>

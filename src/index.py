@@ -161,7 +161,7 @@ def booking():
         check_out = request.form['check_out']
         guests = request.form['guests']
         rooms = request.form['rooms']
-        hotel_name = request.form.get('hotel_name')
+        hotel_name = request.form.get['hotel_name']
 
         session['booking_details'] = {
             'destination': destination,

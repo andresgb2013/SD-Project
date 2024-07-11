@@ -132,24 +132,6 @@ def booking_cancel():
 def home():
     return render_template('home.html')
 
-@app.route('/hotel_info/<hotel_name>', methods=['GET', 'POST'])
-def hotel_info(hotel_name):
-    if not session.get('authenticated'):
-        return redirect(url_for('login'))
-    # Dummy data for example
-    hotel = {
-        'name': hotel_name,
-        'city': 'Example City',
-        'country': 'Example Country',
-        'description': 'This is a beautiful hotel.',
-        'price': 150,
-        'distance_from_center': 2,
-        'image1': 'path/to/room_image1.jpg',  # Update as necessary
-        'image2': 'path/to/room_image2.jpg',  # Update as necessary
-        'image3': 'path/to/room_image3.jpg'   # Update as necessary
-    }
-    return render_template('hotel_info.html', hotel=hotel)
-
 @app.route('/booking', methods=['GET', 'POST'])
 def booking():
     if request.method == 'POST':
@@ -199,6 +181,24 @@ def booking():
     hotels = hotels_by_city.get(destination, [])
 
     return render_template('booking.html', booking_details=booking_details, hotels=hotels)
+
+@app.route('/hotel_info/<hotel_name>', methods=['GET', 'POST'])
+def hotel_info(hotel_name):
+    if session.get('authenticated'):
+        return redirect(url_for('login'))
+    # Dummy data for example
+    hotel = {
+        'name': hotel_name,
+        'city': 'Example City',
+        'country': 'Example Country',
+        'description': 'This is a beautiful hotel.',
+        'price': 150,
+        'distance_from_center': 2,
+        'image1': 'path/to/room_image1.jpg',  # Update as necessary
+        'image2': 'path/to/room_image2.jpg',  # Update as necessary
+        'image3': 'path/to/room_image3.jpg'   # Update as necessary
+    }
+    return render_template('hotel_info.html', hotel=hotel)
 
 
 @app.route('/confirmation', methods=['GET', 'POST'])

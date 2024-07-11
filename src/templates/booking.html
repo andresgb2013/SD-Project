@@ -7,14 +7,39 @@
 
 <div class="container my-5">
     {% if booking_details %}
-    <div class="card mb-3">
+    <div class="card mb-5">
         <div class="card-body">
             <h3 class="card-title">Your Selected Options</h3>
-            <p><strong>Destination:</strong> {{ booking_details.destination }}</p>
-            <p><strong>Check-in:</strong> {{ booking_details.check_in }}</p>
-            <p><strong>Check-out:</strong> {{ booking_details.check_out }}</p>
-            <p><strong>Guests:</strong> {{ booking_details.guests }}</p>
-            <p><strong>Rooms:</strong> {{ booking_details.rooms }}</p>
+            <form class="d-flex flex-wrap justify-content-center align-items-center" action="{{ url_for('booking') }}" method="POST">
+                <div class="mb-3">
+                    <label for="destination" class="form-label"><strong>Destination:</strong></label>
+                    <input type="text" id="destination" name="destination" class="form-control" value="{{ booking_details.destination }}">
+                    <!-- <label for="destination" class="form-label"><strong>Destination:</strong></label>
+                    <select id="destination" name="destination" class="form-control">
+                        {% for destination in destinations %}
+                        <option value="{{ destination }}" {% if destination == booking_details.destination %}selected{% endif %}>{{ destination }}</option>
+                        {% endfor %}
+                    </select> -->
+                </div>
+                <div class="mb-3">
+                    <label for="check_in" class="form-label"><strong>Check-in:</strong></label>
+                    <input type="date" id="check_in" name="check_in" class="form-control" value="{{ booking_details.check_in }}">
+                </div>
+                <div class="mb-3">
+                    <label for="check_out" class="form-label"><strong>Check-out:</strong></label>
+                    <input type="date" id="check_out" name="check_out" class="form-control" value="{{ booking_details.check_out }}">
+                </div>
+                <div class="mb-3">
+                    <label for="guests" class="form-label"><strong>Guests:</strong></label>
+                    <input type="number" id="guests" name="guests" class="form-control" value="{{ booking_details.guests }}">
+                </div>
+                <div class="mb-3">
+                    <label for="rooms" class="form-label"><strong>Rooms:</strong></label>
+                    <input type="number" id="rooms" name="rooms" class="form-control" value="{{ booking_details.rooms }}">
+                </div>
+                <button type="submit" class="btn btn-primary">Update Booking</button>
+            </form>
+            
         </div>
     </div>
 

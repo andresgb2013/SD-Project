@@ -14,6 +14,7 @@
 {% if current_user.is_authenticated %}
 <a href="{{ url_for('user_profile') }}">Welcome, {{ current_user.name }}!</a>
 <a href="{{ url_for('logout') }}" class="btn btn-light btn-sm btn-custom">Logout</a>
+
 {% else %}
 <a href="{{ url_for('login') }}" class="btn btn-light btn-sm btn-custom">Login</a>
 <a href="{{ url_for('register') }}" class="btn btn-light btn-sm btn-custom">Register</a>
@@ -52,11 +53,11 @@
 </section>
 <section id="destinations" class="mt-5">
     <h2 class="h4 mb-3">Popular Destinations</h2>
-    <ul class="list-group">
-        <li class="list-group-item">Berlin</li>
-        <li class="list-group-item">Munich</li>
-        <li class="list-group-item">Hamburg</li>
-        <li class="list-group-item">Frankfurt</li>
+    <ul class="list-group" name="destination">
+        <li class="list-group-item"><a href="{{ url_for('booking', destination='Berlin') }}" method="POST">Berlin</a></li>
+        <li class="list-group-item"><a href="{{ url_for('booking', destination='Munich') }}">Munich</a></li>
+        <li class="list-group-item"><a href="{{ url_for('booking', destination='Hamburg') }}">Hamburg</a></li>
+        <li class="list-group-item"><a href="{{ url_for('booking', destination='Munich') }}">Frankfurt</a></li>
     </ul>
 </section>
 {% endblock %}

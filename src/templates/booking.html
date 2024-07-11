@@ -1,54 +1,57 @@
-<!-- booking.html -->
 {% extends 'home.html' %}
 
 {% block title %}Booking - Trip Booking{% endblock %}
 
 {% block content %}
-
 <div class="container my-5">
     {% if booking_details %}
     <div class="card mb-5">
         <div class="card-body">
-            <h3 class="card-title">Your Selected Options</h3>
-            <form class="d-flex flex-wrap justify-content-center align-items-center" action="{{ url_for('booking') }}" method="POST">
-                <div class="mb-3">
-                    <label for="destination" class="form-label"><strong>Destination:</strong></label>
-                    <input type="text" id="destination" name="destination" class="form-control" value="{{ booking_details.destination }}">
-                    <!-- <label for="destination" class="form-label"><strong>Destination:</strong></label>
-                    <select id="destination" name="destination" class="form-control">
-                        {% for destination in destinations %}
-                        <option value="{{ destination }}" {% if destination == booking_details.destination %}selected{% endif %}>{{ destination }}</option>
-                        {% endfor %}
-                    </select> -->
+            <h3 class="card-title mb-4 text-center">Your Selected Options</h3>
+            <form action="{{ url_for('booking') }}" method="POST">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="destination" class="form-label"><strong>Destination:</strong></label>
+                        <input type="text" id="destination" name="destination" class="form-control" value="{{ booking_details.destination }}"> 
+                         
+                        <!-- <select id="destination" name="destination" class="form-select">
+                            {% for destination in destinations %}
+                            <option value="{{ destination }}" {% if destination == booking_details.destination %}selected{% endif %}>{{ destination }}</option>
+                            {% endfor %}
+                            If using the text-field than the logic and action are working. 
+                            Error in select function or drop-down menu
+                        </select> -->
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="check_in" class="form-label"><strong>Check-in:</strong></label>
+                        <input type="date" id="check_in" name="check_in" class="form-control" value="{{ booking_details.check_in }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="check_out" class="form-label"><strong>Check-out:</strong></label>
+                        <input type="date" id="check_out" name="check_out" class="form-control" value="{{ booking_details.check_out }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="guests" class="form-label"><strong>Guests:</strong></label>
+                        <input type="number" id="guests" name="guests" class="form-control" value="{{ booking_details.guests }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="rooms" class="form-label"><strong>Rooms:</strong></label>
+                        <input type="number" id="rooms" name="rooms" class="form-control" value="{{ booking_details.rooms }}">
+                    </div>
+                    <div class="col-12 text-center">
+                        <button type="submit" class="btn btn-primary mt-3">Update Booking</button>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label for="check_in" class="form-label"><strong>Check-in:</strong></label>
-                    <input type="date" id="check_in" name="check_in" class="form-control" value="{{ booking_details.check_in }}">
-                </div>
-                <div class="mb-3">
-                    <label for="check_out" class="form-label"><strong>Check-out:</strong></label>
-                    <input type="date" id="check_out" name="check_out" class="form-control" value="{{ booking_details.check_out }}">
-                </div>
-                <div class="mb-3">
-                    <label for="guests" class="form-label"><strong>Guests:</strong></label>
-                    <input type="number" id="guests" name="guests" class="form-control" value="{{ booking_details.guests }}">
-                </div>
-                <div class="mb-3">
-                    <label for="rooms" class="form-label"><strong>Rooms:</strong></label>
-                    <input type="number" id="rooms" name="rooms" class="form-control" value="{{ booking_details.rooms }}">
-                </div>
-                <button type="submit" class="btn btn-primary">Update Booking</button>
             </form>
-            
         </div>
     </div>
 
-    <div class="mt-4">
-        <h4 class="mb-3">Available Hotels</h4>
+    <div class="mt-5">
+        <h4 class="mb-3 text-center">Available Hotels</h4>
         <div class="row">
             {% for hotel in hotels %}
-            <div class="col-md-4">
-                <div class="card mb-4">
+            <div class="col-md-4 mb-4">
+                <div class="card">
                     <img src="{{ hotel.image }}" class="card-img-top" alt="Hotel Image">
                     <div class="card-body">
                         <h5 class="card-title">{{ hotel.name }}</h5>
@@ -65,9 +68,8 @@
         </div>
     </div>
     {% else %}
-    <div class="alert alert-warning" role="alert">
-        No booking details found. Please go back to <a href="{{ url_for('home') }}" class="alert-link">home page</a>
-        to make a booking.
+    <div class="alert alert-warning text-center" role="alert">
+        No booking details found. Please go back to <a href="{{ url_for('home') }}" class="alert-link">home page</a> to make a booking.
     </div>
     {% endif %}
 </div>

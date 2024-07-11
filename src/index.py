@@ -25,7 +25,6 @@ city_collection = db['city']
 manager_collection = db['manager']
 
 
-
 class User(UserMixin):
     def __init__(self, user_id, name,lastname, email, password_hash, auth_level):
         self.id = user_id
@@ -131,6 +130,7 @@ def logout():
 
 
 @app.route('/user_profile')
+@login_required
 def user_profile():
     if session.get('authenticated'):
         return redirect(url_for('login'))
@@ -288,10 +288,40 @@ def super_listing():
 def super_add_city():
     return render_template('super_add_city.html')
 
-@app.route('/super_add_manager')
+@app.route('/super_add_manager', methods=['GET', 'POST'])
+@login_required
 def super_add_manager():
-    return render_template('super_add_manager.html')
+    if current_user.auth_level != 'super_user':
+        flash("Access Denied: You don't have the necessary permissions.", 'danger')
+        return redirect(url_for('home'))
+    
+    if request.method == 'POST':
+        name = request.form['name']
+        lastName = request.form['lastname']
+        email = request.form['email']
+        password = request.form['password']
+        confirm_password = request.form['confirm_password']
 
+        existing_user = users_collection.find_one({'email': email})
+        if existing_user:
+            flash('Email address already registered', 'error')
+        elif len(password) < 8:
+            flash('Password must be at least 8 characters long', 'error')
+        elif password != confirm_password:
+            flash('Passwords do not match', 'error')
+        else:
+            user_data = {
+                'name': name,
+                'lastname': lastName,
+                'email': email,
+                'password_hash': generate_password_hash(password),
+                'auth_level': 'manager_user'  # Asignar nivel de autorización de manager
+            }
+            users_collection.insert_one(user_data)
+            flash('Manager added successfully', 'success')
+            return redirect(url_for('super_profile'))
+    
+    return render_template('super_add_manager.html')
 
 
 if __name__ == '__main__':

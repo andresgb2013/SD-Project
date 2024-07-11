@@ -1,3 +1,4 @@
+<!-- super_add_manager.html -->
 {% extends 'base.html' %}
 
 {% block title %}Super Add Manager - Travel Booking{% endblock %}
@@ -18,7 +19,8 @@
             margin: 10px auto;
         }
         .manager-container input[type="text"], 
-        .manager-container input[type="password"] {
+        .manager-container input[type="password"], 
+        .manager-container input[type="email"] {
             width: calc(80% - 20px);
             padding: 10px;
             margin-right: 10px;
@@ -48,20 +50,29 @@
     <div class="col-md-10">
         <div class="card">
             <div class="manager-container">
-                <form>
+                <form action="{{ url_for('super_add_manager') }}" method="POST">
                     <div class="field-container">
-                        <input type="text" id="name" name="name" placeholder="Name">
+                        <input type="text" id="name" name="name" placeholder="Name" required>
                         <button class="btn btn-primary mx-2" type="button" onclick="editField('name')">Edit</button>
                     </div>
                     <div class="field-container">
-                        <input type="text" id="username" name="username" placeholder="Username">
-                        <button class="btn btn-primary mx-2" type="button" onclick="editField('username')">Edit</button>
+                        <input type="text" id="lastname" name="lastname" placeholder="Last name" required>
+                        <button class="btn btn-primary mx-2" type="button" onclick="editField('lastname')">Edit</button>
                     </div>
                     <div class="field-container">
-                        <input type="password" id="password" name="password" placeholder="Password">
+                        <input type="email" id="email" name="email" placeholder="Email" required>
+                        <button class="btn btn-primary mx-2" type="button" onclick="editField('email')">Edit</button>
+                    </div>
+                    <div class="field-container">
+                        <input type="password" id="password" name="password" placeholder="Password (min. 8 characters)" required>
                         <button class="btn btn-primary mx-2" type="button" onclick="editField('password')">Edit</button>
                     </div>
-                    <button class="btn btn-primary mx-2" type="button" onclick="saveManager()">Save</button>
+                    <div class="field-container">
+                        <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm Password" required>
+                        <button class="btn btn-primary mx-2" type="button" onclick="editField('confirm_password')">Edit</button>
+                    </div>
+
+                    <button class="btn btn-primary mx-2" type="submit" onclick="saveManager()">Save Manager</button>
                     <button class="btn btn-danger mx-2" type="button" onclick="deleteManager()">Delete</button>
                 </form>
             </div>
@@ -83,5 +94,4 @@
         window.location.href = '/super_listing';
     }
 </script>
-
 {% endblock %}

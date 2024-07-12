@@ -424,12 +424,24 @@ def hotels():
 
     return render_template('hotels_testing.html', hotels=hotels_list)
 
+
+
 @app.route('/hotel_photo/<photo_id>')
 def hotel_photo(photo_id):
     photo = fs.get(ObjectId(photo_id))
     return send_file(photo, mimetype='image/jpeg')
 
+@app.route('/hotels_city', methods=['GET', 'POST'])
+def hotels_city():
+    city = request.form.get('city')
+    query = {}  # Consulta vacía por defecto
 
+
+    if city:
+        query['address.city'] = city
+
+    hotels = hotels_collection.find(query)
+    return render_template('hotels_testing.html', hotels=hotels)
 
 
 

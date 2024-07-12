@@ -26,10 +26,33 @@
     .hotel-details {
         text-align: left;
     }
+    .city-dropdown {
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    .city-dropdown select {
+        padding: 10px;
+        font-size: 16px;
+    }
 </style>
 
 <div class="hotel-container">
     <h2>Our Hotels</h2>
+
+    <div class="city-dropdown">
+        <form method="POST" action="{{ url_for('hotels') }}">
+            <div class="col-md-3 mx-auto">
+                <select class="form-select" name="city" required onchange="this.form.submit()">
+                    <option value="">Select Destination</option>
+                    <option value="Berlin">Berlin</option>
+                    <option value="Munich">Munich</option>
+                    <option value="Hamburg">Hamburg</option>
+                    <option value="Frankfurt">Frankfurt</option>
+                </select>
+            </div>
+        </form>
+    </div>
+
     {% for hotel in hotels %}
     <div class="hotel-card">
         <h3>{{ hotel.title }}</h3>
@@ -37,7 +60,7 @@
             <p><strong>Address:</strong> {{ hotel.address.street1 }}, {{ hotel.address.street2 }}, {{ hotel.address.street3 }}, {{ hotel.address.city }}, {{ hotel.address.postal_code }}, {{ hotel.address.country }}</p>
             <p><strong>Description:</strong> {{ hotel.description }}</p>
             <p><strong>Extra Info:</strong> {{ hotel.extra_info }}</p>
-            <p><strong>No. of Guests:</strong> {{ hotel.no_of_guests }}</p>
+            <p><strong>Number of Guests:</strong> {{ hotel.no_of_guests }}</p>
             <p><strong>Price per Night:</strong> ${{ hotel.price_per_night }}</p>
         </div>
         <div class="hotel-photos">
@@ -49,3 +72,4 @@
     {% endfor %}
 </div>
 {% endblock %}
+

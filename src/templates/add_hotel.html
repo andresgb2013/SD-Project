@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Hotel - Travel Booking{% endblock %}
+
+{% block content %}
+<style>
+    .editing-container {
+        width: 60%;
+        margin: auto;
+        padding: 20px;
+        text-align: center;
+    }
+    .editing-container .field-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 10px auto;
+    }
+    .editing-container input[type="text"], 
+    .editing-container input[type="email"], 
+    .editing-container input[type="password"] {
+        width: calc(80% - 20px);
+        padding: 10px;
+        margin-right: 10px;
+    }
+    .editing-container textarea {
+        width: calc(100% - 20px);
+        padding: 10px;
+        margin: 10px auto;
+    }
+    .editing-container .button {
+        margin: 10px;
+    }
+    .button {
+        display: inline-block;
+        background: #e8491d;
+        color: #fff;
+        padding: 10px 20px;
+        text-align: center;
+        cursor: pointer;
+        border: none;
+        margin: 5px 0;
+    }
+    .small-btn {
+        display: inline-block;
+        text-align: center;
+        padding: 5px 10px;
+        margin: 0;
+    }
+</style>
+
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="editing-container">
+                <form action="{{ url_for('add_hotel') }}" method="POST" enctype="multipart/form-data">
+                    <div class="field-container">
+                        <label>Title:</label>
+                        <input type="text" name="title" id="hotel-title" class="form-control" required>
+                    </div>
+                    <div class="field-container">
+                        <label>Street 1:</label>
+                        <input type="text" name="street1" id="street1" class="form-control" required>
+                        <label>Street 2:</label>
+                        <input type="text" name="street2" id="street2" class="form-control">
+                    </div>
+                    <div class="field-container">
+                        <label>Street 3:</label>
+                        <input type="text" name="street3" id="street3" class="form-control">
+                        <label>Postal Code:</label>
+                        <input type="text" name="postal_code" id="postal_code" class="form-control" required>
+                    </div>
+                    <div class="field-container">
+                        <label>City:</label>
+                        <input type="text" name="city" id="city" class="form-control" required>
+                        <label>Country:</label>
+                        <input type="text" name="country" id="country" class="form-control" required>
+                    </div>
+                    <label>Photos:</label>
+                    <input type="file" name="photos" id="photo-upload" multiple accept="image/*" class="form-control">
+                    <div id="photo-preview" class="photo-preview"></div>
+                    <label>Description:</label>
+                    <textarea name="description" id="description" class="form-control" required></textarea>
+                    <label>Extra Info:</label>
+                    <textarea name="extra_info" id="extra-info" class="form-control"></textarea>
+                    <label>No. of Guests:</label>
+                    <input type="number" name="no_of_guests" id="no-of-guests" class="form-control" required>
+                    <label>Price / Night:</label>
+                    <input type="number" name="price_per_night" id="price-per-night" class="form-control" required>
+                    <button class="btn btn-primary" type="submit">Save</button>
+                    <button class="btn btn-danger" type="button" onclick="deletePlace()">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function deletePlace() {
+        alert('Place deleted successfully!');
+        window.location.href = '/manager_listing';
+    }
+</script>
+
+{% endblock %}

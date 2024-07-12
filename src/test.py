@@ -1,18 +1,17 @@
-import pymongo
+from flask import Flask, request, redirect, url_for, flash, render_template
+from werkzeug.utils import secure_filename
+from pymongo import MongoClient
+import gridfs
+import os
 
-# config.py
-class Config:
-    SECRET_KEY = 'DN0kJdOtj5eJmoo3@cluster0.jzfu1jp.mongodb.net/'
-    MONGO_URI = 'mongodb+srv://andresgb2013'
+app = Flask(__name__)
+app.secret_key = 'supersecretkey'
+
+# Conexión a MongoDB
+client = MongoClient('mongodb+srv://andresgb2013:DN0kJdOtj5eJmoo3@cluster0.jzfu1jp.mongodb.net/')
+db = client['SD_Project']  # Reemplaza 'your_database_name' con el nombre de tu base de datos
+users_collection = db['users']
+hotels_collection = db['hotels']
 
 
-#conexion
-#myClient = pymongo.MongoClient("mongodb+srv://andresgb2013:DN0kJdOtj5eJmoo3@cluster0.jzfu1jp.mongodb.net/")
-#variable that storage this info in my DB
-#myDb = myClient["SD_Project"]
-#myCollection = myDb["users"]
 
-#myUser = { "id": "1234567891", "name": "Peter", "LastName": "Jackson", "email": "peterJ@gmail.com", "password": "1234567891", "auth_level":"super"}
-
-#result = myCollection.insert_one(myUser)
-#print(result)

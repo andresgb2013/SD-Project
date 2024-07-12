@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Hotels - Travel Booking{% endblock %}
+
+{% block content %}
+<style>
+    .hotel-container {
+        width: 80%;
+        margin: auto;
+        padding: 20px;
+        text-align: center;
+    }
+    .hotel-card {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin: 20px 0;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .hotel-card img {
+        width: 100%;
+        height: auto;
+        border-radius: 5px;
+        margin: 10px 0;
+    }
+    .hotel-details {
+        text-align: left;
+    }
+</style>
+
+<div class="hotel-container">
+    <h2>Our Hotels</h2>
+    {% for hotel in hotels %}
+    <div class="hotel-card">
+        <h3>{{ hotel.title }}</h3>
+        <div class="hotel-details">
+            <p><strong>Address:</strong> {{ hotel.address.street1 }}, {{ hotel.address.street2 }}, {{ hotel.address.street3 }}, {{ hotel.address.city }}, {{ hotel.address.postal_code }}, {{ hotel.address.country }}</p>
+            <p><strong>Description:</strong> {{ hotel.description }}</p>
+            <p><strong>Extra Info:</strong> {{ hotel.extra_info }}</p>
+            <p><strong>No. of Guests:</strong> {{ hotel.no_of_guests }}</p>
+            <p><strong>Price per Night:</strong> ${{ hotel.price_per_night }}</p>
+        </div>
+        <div class="hotel-photos">
+            {% for photo_id in hotel.photos %}
+            <img src="{{ url_for('hotel_photo', photo_id=photo_id) }}" alt="Hotel Photo">
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

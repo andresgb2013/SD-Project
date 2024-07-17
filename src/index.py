@@ -146,47 +146,23 @@ def booking():
         check_out = request.form['check_out']
         guests = request.form['guests']
         rooms = request.form['rooms']
-        hotel_name = request.form.get('hotel_name')
 
-        session['booking_details'] = {
+        booking_details = {
             'destination': destination,
             'check_in': check_in,
             'check_out': check_out,
             'guests': guests,
-            'rooms': rooms,
-            'hotel_name': hotel_name
+            'rooms': rooms
         }
 
-        print("Booking details saved in session:", session['booking_details'])
+        session['booking_details'] = booking_details
 
-        if hotel_name:
-            return redirect(url_for('confirmation'))
+        hotels = list(hotels_collection.find({'address.city': destination}))
 
-    booking_details = session.get('booking_details', {})
-    print("Booking details retrieved from session:", booking_details)
+        return render_template('booking.html', booking_details=booking_details, hotels=hotels)
 
-    hotels_by_city = {
-        'Berlin': [
-            {'name': 'Hotel Berlin', 'price': '100', 'image': url_for('static', filename='images/hotel1.jpg')},
-            {'name': 'Berlin Hilton', 'price': '150', 'image': url_for('static', filename='images/hotel2.jpg')},
-            {'name': 'Berlin Marriott', 'price': '200', 'image': url_for('static', filename='images/hotel3.jpg')}
-        ],
-        'Munich': [
-            {'name': 'Munich International', 'price': '120', 'image': url_for('static', filename='images/hotel1.jpg')},
-            {'name': 'Munich Hilton', 'price': '170', 'image': url_for('static', filename='images/hotel2.jpg')},
-            {'name': 'Munich Marriott', 'price': '220', 'image': url_for('static', filename='images/hotel3.jpg')}
-        ],
-        'Hamburg': [
-            {'name': 'Hamburg Inn', 'price': '90', 'image': url_for('static', filename='images/hotel1.jpg')},
-            {'name': 'Hamburg Hilton', 'price': '140', 'image': url_for('static', filename='images/hotel2.jpg')},
-            {'name': 'Hamburg Marriott', 'price': '190', 'image': url_for('static', filename='images/hotel3.jpg')}
-        ]
-    }
+    return redirect(url_for('home'))
 
-    destination = booking_details.get('destination')
-    hotels = hotels_by_city.get(destination, [])
-
-    return render_template('booking.html', booking_details=booking_details, hotels=hotels)
 
 @app.route('/hotel_info/<hotel_name>', methods=['GET', 'POST'])
 def hotel_info(hotel_name):
@@ -212,9 +188,14 @@ def hotel_info(hotel_name):
 def confirmation():
     if request.method == 'POST':
         hotel_name = request.form['hotel_name']
-        hotel_price = int(request.form['hotel_price'])
+        hotel_price = float(request.form['hotel_price'])
+        hotel_photos= request.form['hotel_photos']
 
         booking_details = session.get('booking_details', {})
+        if not booking_details:
+            flash('No booking details found. Please start your booking again.')
+            return redirect(url_for('home'))
+
         check_in = datetime.strptime(booking_details['check_in'], '%Y-%m-%d')
         check_out = datetime.strptime(booking_details['check_out'], '%Y-%m-%d')
         num_nights = (check_out - check_in).days
@@ -223,6 +204,7 @@ def confirmation():
 
         booking_details['hotel_name'] = hotel_name
         booking_details['hotel_price'] = total_price
+        booking_details['hotel_photos']= hotel_photos
         session['booking_details'] = booking_details
 
         flash('Booking confirmed!')
@@ -270,7 +252,12 @@ def super_listing():
     return render_template('super_listing.html', managers=managers, cities=cities)
 
 @app.route('/super_add_city')
+@login_required
 def super_add_city():
+    if current_user.auth_level != 'super_user':
+        flash("Access Denied: You don't have the necessary permissions.", 'danger')
+        return redirect(url_for('home'))
+
     return render_template('super_add_city.html')
 
 @app.route('/super_add_manager', methods=['GET', 'POST'])

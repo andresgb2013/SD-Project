@@ -162,3 +162,36 @@ a {
     max-width: 200px;
 }
 
+/*For booking*/
+
+.hotel-photos {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+.hotel-photo {
+    width: calc(50% - 10px); /* Ajusta el tamaño al 50% menos 10px de margen */
+    margin-bottom: 10px;
+    object-fit: cover; /* Mantiene la proporción de la imagen */
+}
+.morecontent span {
+    display: none;
+}
+.morelink {
+    display: inline-block;
+    margin-top: 10px;
+}
+
+/*For confirmation*/
+
+.hotel-photos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.hotel-photo {
+    width: calc(50% - 5px);
+    object-fit: cover;
+}

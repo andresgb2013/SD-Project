@@ -1,4 +1,4 @@
-{% extends 'home.html' %}
+{% extends 'base.html' %}
 
 {% block title %}Booking - Trip Booking{% endblock %}
 
@@ -12,23 +12,28 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="destination" class="form-label"><strong>Destination:</strong></label>
-                        <input type="text" id="destination" name="destination" class="form-control" value="{{ booking_details.destination }}"> 
+                        <input type="text" id="destination" name="destination" class="form-control"
+                            value="{{ booking_details.destination }}">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="check_in" class="form-label"><strong>Check-in:</strong></label>
-                        <input type="date" id="check_in" name="check_in" class="form-control" value="{{ booking_details.check_in }}">
+                        <input type="date" id="check_in" name="check_in" class="form-control"
+                            value="{{ booking_details.check_in }}">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="check_out" class="form-label"><strong>Check-out:</strong></label>
-                        <input type="date" id="check_out" name="check_out" class="form-control" value="{{ booking_details.check_out }}">
+                        <input type="date" id="check_out" name="check_out" class="form-control"
+                            value="{{ booking_details.check_out }}">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="guests" class="form-label"><strong>Guests:</strong></label>
-                        <input type="number" id="guests" name="guests" class="form-control" value="{{ booking_details.guests }}">
+                        <input type="number" id="guests" name="guests" class="form-control"
+                            value="{{ booking_details.guests }}">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="rooms" class="form-label"><strong>Rooms:</strong></label>
-                        <input type="number" id="rooms" name="rooms" class="form-control" value="{{ booking_details.rooms }}">
+                        <input type="number" id="rooms" name="rooms" class="form-control"
+                            value="{{ booking_details.rooms }}">
                     </div>
                     <div class="col-12 text-center">
                         <button type="submit" class="btn btn-primary mt-3">Update Booking</button>
@@ -43,14 +48,36 @@
         <div class="row">
             {% for hotel in hotels %}
             <div class="col-md-4 mb-4">
-                <div class="card">
-                    <img src="{{ hotel.image }}" class="card-img-top" alt="Hotel Image">
+                <div class="card h-100">
+                    <div class="hotel-photos">
+                        {% for photo_id in hotel.photos %}
+                        <img src="{{ url_for('hotel_photo', photo_id=photo_id) }}" alt="Hotel Photo"
+                            class="hotel-photo">
+                        {% endfor %}
+                    </div>
                     <div class="card-body">
-                        <h5 class="card-title">{{ hotel.name }}</h5>
-                        <p class="card-text"><strong>Price per night:</strong> {{ hotel.price }}</p>
+                        <h5 class="card-title">{{ hotel.title }}</h5>
+                        <p class="card-text"><strong>City:</strong> {{ hotel.address.city }}</p>
+                        <p class="card-text"><strong>Country:</strong> {{ hotel.address.country }}</p>
+                        <p class="card-text"><strong>ID:</strong> {{ hotel.photos }}</p>
+
+                        <div class="mb-2">
+                            <p><strong>Description:</strong> <span class="description">{{ hotel.description }}</span>
+                            </p>
+                        </div>
+                        <div class="mb-2">
+                            <p><strong>Extra Info:</strong> <span class="extra-info">{{ hotel.extra_info }}</span></p>
+                        </div>
+                        <p class="card-text"><strong>Price per night:</strong> {{ hotel.price_per_night }}</p>
                         <form action="{{ url_for('confirmation') }}" method="POST">
-                            <input type="hidden" name="hotel_name" value="{{ hotel.name }}">
-                            <input type="hidden" name="hotel_price" value="{{ hotel.price }}">
+                            <input type="hidden" name="hotel_name" value="{{ hotel.title }}">
+                            <input type="hidden" name="hotel_price" value="{{ hotel.price_per_night }}">
+                            <input type="hidden" name="check_in" value="{{ booking_details.check_in }}">
+                            <input type="hidden" name="check_out" value="{{ booking_details.check_out }}">
+                            <input type="hidden" name="guests" value="{{ booking_details.guests }}">
+                            <input type="hidden" name="rooms" value="{{ booking_details.rooms }}">
+                            <input type="hidden" name="hotel_photos" value="{{ hotel.photos }}">
+
                             <button type="submit" class="btn btn-primary">Book Now</button>
                         </form>
                     </div>
@@ -61,8 +88,46 @@
     </div>
     {% else %}
     <div class="alert alert-warning text-center" role="alert">
-        No booking details found. Please go back to <a href="{{ url_for('home') }}" class="alert-link">home page</a> to make a booking.
+        No booking details found. Please go back to <a href="{{ url_for('home') }}" class="alert-link">home page</a> to
+        make a booking.
     </div>
     {% endif %}
 </div>
+
+<!-- Script para "Leer más" -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var showChar = 100;
+        var ellipsestext = "...";
+        var moretext = "Read more";
+        var lesstext = "Read less";
+
+        document.querySelectorAll('.description, .extra-info').forEach(function (content) {
+            var contentText = content.innerHTML;
+            if (contentText.length > showChar) {
+                var c = contentText.substr(0, showChar);
+                var h = contentText.substr(showChar, contentText.length - showChar);
+
+                var html = c + '<span class="moreellipses">' + ellipsestext + '&nbsp;</span><span class="morecontent"><span>' + h + '</span>&nbsp;&nbsp;<a href="" class="morelink">' + moretext + '</a></span>';
+
+                content.innerHTML = html;
+            }
+        });
+
+        document.querySelectorAll('.morelink').forEach(function (link) {
+            link.addEventListener('click', function (event) {
+                event.preventDefault();
+                var morecontent = this.previousElementSibling;
+                if (this.classList.contains('less')) {
+                    this.classList.remove('less');
+                    this.innerHTML = moretext;
+                } else {
+                    this.classList.add('less');
+                    this.innerHTML = lesstext;
+                }
+                morecontent.style.display = morecontent.style.display == 'inline' ? 'none' : 'inline';
+            });
+        });
+    });
+</script>
 {% endblock %}

@@ -1,5 +1,4 @@
-<!-- confirmation.html -->
-{% extends 'home.html' %}
+{% extends 'base.html' %}
 
 {% block title %}Booking Confirmation - Trip Booking{% endblock %}
 
@@ -16,38 +15,75 @@
         <p><strong>Guests:</strong> {{ booking_details.guests }}</p>
         <p><strong>Rooms:</strong> {{ booking_details.rooms }}</p>
         <p><strong>Hotel:</strong> {{ booking_details.hotel_name }}</p>
-        <p><strong>Total Price:</strong> {{ booking_details.hotel_price }} USD</p>
+        <p><strong>Total Price:</strong> {{ booking_details.hotel_price }} EUR</p>
+        <p><strong>ID:</strong> {{ booking_details.hotel_photos }} </p>
+
     </div>
 
-    {% if current_user.is_authenticated %}
-    <form action="{{ url_for('confirm_booking') }}" method="POST">
-        <input type="hidden" name="hotel_name" value="{{ booking_details.hotel_name }}">
-        <input type="hidden" name="hotel_price" value="{{ booking_details.hotel_price }}">
-        <button type="submit" class="btn btn-primary " onclick="confirmBooking()">Confirm Booking</button>
-    </form>
-    {% else %}
-    <div class="alert alert-warning" role="alert">
-        You need to <a href="{{ url_for('login') }}" class="alert-link">login</a> to confirm your booking.
+    <div class="mt-5">
+        <h4 class="mb-3">Available Photos</h4>
+        <div class="hotel-photos">
+            <img src="{{ url_for('hotel_photo', photo_id= booking_details.hotel_photos) }}" alt="Hotel Photo"
+            class="hotel-photo">
+        </div>
     </div>
-    {% endif %}
+
+    <div class="mt-5">
+        <h4 class="mb-3">Payment Information</h4>
+        <form action="{{ url_for('confirm_booking') }}" method="POST">
+            <input type="hidden" name="hotel_name" value="{{ booking_details.hotel_name }}">
+            <input type="hidden" name="hotel_price" value="{{ booking_details.hotel_price }}">
+            <div class="mb-3">
+                <label for="payment_method" class="form-label"><strong>Payment Method:</strong></label>
+                <select id="payment_method" name="payment_method" class="form-select" required>
+                    <option value="">Select Payment Method</option>
+                    <option value="Credit Card">Credit Card</option>
+                    <option value="Debit Card">Debit Card</option>
+                    <option value="PayPal">PayPal</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="card_number" class="form-label"><strong>Card Number:</strong></label>
+                <input type="text" id="card_number" name="card_number" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="expiration_date" class="form-label"><strong>Expiration Date:</strong></label>
+                <input type="text" id="expiration_date" name="expiration_date" class="form-control" placeholder="MM/YY" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="cvv" class="form-label"><strong>CVV:</strong></label>
+                <input type="text" id="cvv" name="cvv" class="form-control" required>
+            </div>
+
+            <div class="mt-5">
+                <h5 class="mb-3">Cancellation Policy</h5>
+                <p class="small">
+                    You can cancel your booking up to 24 hours before check-in time for a full refund. After that, a cancellation fee equal to one night's stay will apply.
+                </p>
+            </div>
+
+            {% if current_user.is_authenticated %}
+            <button type="submit" class="btn btn-primary">Confirm Booking</button>
+            {% else %}
+            <div class="alert alert-warning" role="alert">
+                You need to <a href="{{ url_for('login') }}" class="alert-link">login</a> to confirm your booking.
+            </div>
+            {% endif %}
+        </form>
+    </div>
 
     <a href="{{ url_for('booking') }}" class="btn btn-secondary mt-3">Back to Booking</a>
 
     {% else %}
     <div class="alert alert-warning" role="alert">
-        No booking details found. Please go back to <a href="{{ url_for('home') }}" class="alert-link">home
-            page</a> to make a booking.
+        No booking details found. Please go back to <a href="{{ url_for('home') }}" class="alert-link">home page</a> to make a booking.
     </div>
     {% endif %}
 </div>
 
-<script>
-    function confirmBooking() {
-        event.preventDefault(); // Prevent form from submitting the traditional way
-        alert('Booking confirmed successfully!');
-        window.location.href = '/user_booking';
-        document.getElementById('confirm-form').submit(); // Submit the form after the alert
-    }
-</script>
+
 
 {% endblock %}

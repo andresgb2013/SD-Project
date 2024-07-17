@@ -255,22 +255,42 @@ def manager_listing():
     return render_template('manager_listing.html')
 
 @app.route('/manager_hotel_editing')
+@login_required
 def manager_hotel_editing():
+    if current_user.auth_level != 'manager_user':
+        flash("Access Denied: You don't have the necessary permissions.", 'danger')
+        return redirect(url_for('login'))
+
     return render_template('manager_hotel_editing.html')
 
 @app.route('/super_profile')
+@login_required
 def super_profile():
+    if current_user.auth_level != 'super_user':
+        flash("Access Denied: You don't have the necessary permissions.", 'danger')
+        return redirect(url_for('login'))
+
     return render_template('super_profile.html')
 
 @app.route('/super_listing')
+@login_required
 def super_listing():
+    if current_user.auth_level != 'super_user':
+        flash("Access Denied: You don't have the necessary permissions.", 'danger')
+        return redirect(url_for('login'))
+
     # Sample data for managers and cities
     managers = [{'name': 'John Doe', 'details': 'Manager of City A'}]
     cities = [{'name': 'City A', 'details': 'Details of City A'}]
     return render_template('super_listing.html', managers=managers, cities=cities)
 
 @app.route('/super_add_city')
+@login_required
 def super_add_city():
+    if current_user.auth_level != 'super_user':
+        flash("Access Denied: You don't have the necessary permissions.", 'danger')
+        return redirect(url_for('login'))
+
     return render_template('super_add_city.html')
 
 @app.route('/super_add_manager', methods=['GET', 'POST'])
@@ -278,7 +298,7 @@ def super_add_city():
 def super_add_manager():
     if current_user.auth_level != 'super_user':
         flash("Access Denied: You don't have the necessary permissions.", 'danger')
-        return redirect(url_for('home'))
+        return redirect(url_for('login'))
     
     if request.method == 'POST':
         name = request.form['name']

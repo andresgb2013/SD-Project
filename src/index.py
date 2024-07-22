@@ -141,6 +141,7 @@ def home():
 @app.route('/booking', methods=['GET', 'POST'])
 def booking():
     if request.method == 'POST':
+        # Lógica existente para manejar el formulario de búsqueda
         destination = request.form['destination']
         check_in = request.form['check_in']
         check_out = request.form['check_out']
@@ -161,26 +162,52 @@ def booking():
 
         return render_template('booking.html', booking_details=booking_details, hotels=hotels)
 
+    elif request.method == 'GET':
+        # Lógica para manejar la solicitud GET desde "Popular Destinations"
+        destination = request.args.get('destination')
+        if destination:
+            hotels = list(hotels_collection.find({'address.city': destination}))
+
+            return render_template('booking.html', destination=destination, hotels=hotels)
+
     return redirect(url_for('home'))
 
 
-@app.route('/hotel_info/<hotel_name>', methods=['GET', 'POST'])
-def hotel_info(hotel_name):
-    if session.get('authenticated'):
-        return redirect(url_for('login'))
-    # Dummy data for example
-    hotel = {
-        'name': hotel_name,
-        'city': 'Example City',
-        'country': 'Example Country',
-        'description': 'This is a beautiful hotel.',
-        'price': 150,
-        'distance_from_center': 2,
-        'image1': 'path/to/room_image1.jpg',  # Update as necessary
-        'image2': 'path/to/room_image2.jpg',  # Update as necessary
-        'image3': 'path/to/room_image3.jpg'   # Update as necessary
-    }
-    return render_template('hotel_info.html', hotel=hotel)
+
+@app.route('/hotel_info', methods=['GET', 'POST'])
+@login_required
+def hotel_info():
+    if request.method == 'POST':
+        hotel_name = request.form['hotel_name']
+        hotel_price = float(request.form['hotel_price'])
+        hotel_photos= request.form['hotel_photos']
+
+        booking_details = session.get('booking_details', {})
+        if not booking_details:
+            flash('No booking details found. Please start your booking again.')
+            return redirect(url_for('home'))
+
+        check_in = datetime.strptime(booking_details['check_in'], '%Y-%m-%d')
+        check_out = datetime.strptime(booking_details['check_out'], '%Y-%m-%d')
+        num_nights = (check_out - check_in).days
+
+        total_price = hotel_price * num_nights
+
+        booking_details['hotel_name'] = hotel_name
+        booking_details['hotel_price'] = total_price
+        booking_details['hotel_photos']= hotel_photos
+        session['booking_details'] = booking_details
+
+        flash('Booking confirmed!')
+        return redirect(url_for('confirmation'))
+
+    booking_details = session.get('booking_details', {})
+    if not booking_details:
+        flash('No booking details found. Please start your booking again.')
+        return redirect(url_for('home'))
+
+
+    return render_template('hotel_info.html', booking_details=booking_details)
 
 
 @app.route('/confirmation', methods=['GET', 'POST'])
@@ -237,15 +264,30 @@ def manager_listing():
     return render_template('manager_listing.html')
 
 @app.route('/manager_hotel_editing')
+@login_required
 def manager_hotel_editing():
+    if current_user.auth_level != 'manager_user':
+        flash("Access Denied: You don't have the necessary permissions.", 'danger')
+        return redirect(url_for('login'))
+
     return render_template('manager_hotel_editing.html')
 
 @app.route('/super_profile')
+@login_required
 def super_profile():
+    if current_user.auth_level != 'super_user':
+        flash("Access Denied: You don't have the necessary permissions.", 'danger')
+        return redirect(url_for('login'))
+
     return render_template('super_profile.html')
 
 @app.route('/super_listing')
+@login_required
 def super_listing():
+    if current_user.auth_level != 'super_user':
+        flash("Access Denied: You don't have the necessary permissions.", 'danger')
+        return redirect(url_for('login'))
+
     # Sample data for managers and cities
     managers = [{'name': 'John Doe', 'details': 'Manager of City A'}]
     cities = [{'name': 'City A', 'details': 'Details of City A'}]
@@ -265,7 +307,7 @@ def super_add_city():
 def super_add_manager():
     if current_user.auth_level != 'super_user':
         flash("Access Denied: You don't have the necessary permissions.", 'danger')
-        return redirect(url_for('home'))
+        return redirect(url_for('login'))
     
     if request.method == 'POST':
         name = request.form['name']

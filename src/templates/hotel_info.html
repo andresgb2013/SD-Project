@@ -1,75 +1,95 @@
-{% extends 'home.html' %}
+{% extends 'base.html' %}
 
 {% block title %}Hotel Info - Trip Booking{% endblock %}
 
 {% block content %}
-<head>
-    <style>
-        .info-container {
-            width: 80%;
-            margin: auto;
-            padding: 20px;
-            text-align: center;
-        }
-        .info-container .hotel-details {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-        .info-container .hotel-details .image-section,
-        .info-container .hotel-details .details-section {
-            width: 48%;
-        }
-        .info-container .hotel-details .image-section img {
-            width: 100%;
-            height: auto;
-        }
-        .info-container .price-box {
-            border: 1px solid #000;
-            border-radius: 5px;
-            padding: 20px;
-            margin-top: 20px;
-            text-align: left;
-        }
-        .info-container .price-box input {
-            width: 100%;
-            margin-bottom: 10px;
-        }
-    </style>
-</head>
-
-<div class="info-container">
-    <div class="hotel-details">
-        <div class="image-section">
-            <img src="{{ hotel.image1 }}" alt="Room Image 1">
-            <img src="{{ hotel.image2 }}" alt="Room Image 2">
-            <img src="{{ hotel.image3 }}" alt="Room Image 3">
-        </div>
-        <div class="details-section">
-            <h2>{{ hotel.name }}</h2>
-            <p>{{ hotel.city }}, {{ hotel.country }}</p>
-            <p>{{ hotel.description }}</p>
+<div class="container my-5">
+    {% if hotel and booking_details %}
+    <div class="card mb-5">
+        <div class="card-body">
+            <h2 class="card-title mb-4 text-center">{{ hotel.title }}</h2>
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <strong>City:</strong> {{ hotel.address.city }}
+                </div>
+                <div class="col-md-6">
+                    <strong>Country:</strong> {{ hotel.address.country }}
+                </div>
+            </div>
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <strong>Description:</strong> {{ hotel.description }}
+                </div>
+                <div class="col-md-6">
+                    <strong>Extra Info:</strong> {{ hotel.extra_info }}
+                </div>
+            </div>
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <strong>Available Photos:</strong>
+                    <div class="hotel-photos">
+                        {% for photo_id in hotel.photos %}
+                        <img src="{{ url_for('hotel_photo', photo_id=photo_id) }}" alt="Hotel Photo" class="hotel-photo">
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    {% if current_user.is_authenticated %}
+                    <strong>Price per night:</strong> {{ hotel.price_per_night }}
+                    <strong>Total Price:</strong> {{ booking_details.total_price }}
+                    {% else %}
+                    <strong>Login to see the price</strong>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
-    {% if current_user.is_authenticated %}
-    <div class="price-box">
-        <h3>Price ${{ hotel.price }} per Night</h3>
-        <label for="check_in">Check in</label>
-        <input type="date" id="check_in" name="check_in" required>
-        <label for="check_out">Check out</label>
-        <input type="date" id="check_out" name="check_out" required>
-        <label for="guests">Number of Guests</label>
-        <input type="number" id="guests" name="guests" min="1" required>
-        <p>Distance from City Center: {{ hotel.distance_from_center }} km</p>
-        <button class="btn btn-danger" onclick="bookNow()">Book Now</button>
+
+    <div class="card mb-5">
+        <div class="card-body">
+            <h3 class="card-title mb-4 text-center">Update Booking Details</h3>
+            <form action="{{ url_for('hotel_info') }}" method="POST">
+                <input type="hidden" name="hotel_id" value="{{ hotel._id }}">
+                <input type="hidden" name="hotel_name" value="{{ hotel.title }}">
+                <input type="hidden" name="hotel_price" value="{{ hotel.price_per_night }}">
+                <input type="hidden" name="hotel_photos" value="{{ hotel.photos }}">
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="check_in" class="form-label"><strong>Check-in:</strong></label>
+                        <input type="date" id="check_in" name="check_in" class="form-control" value="{{ booking_details.check_in }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="check_out" class="form-label"><strong>Check-out:</strong></label>
+                        <input type="date" id="check_out" name="check_out" class="form-control" value="{{ booking_details.check_out }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="guests" class="form-label"><strong>Guests:</strong></label>
+                        <input type="number" id="guests" name="guests" class="form-control" value="{{ booking_details.guests }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="rooms" class="form-label"><strong>Rooms:</strong></label>
+                        <input type="number" id="rooms" name="rooms" class="form-control" value="{{ booking_details.rooms }}">
+                    </div>
+                    <div class="col-12 text-center">
+                        <button type="submit" class="btn btn-primary mt-3">Update Booking</button>
+                    </div>
+                </div>
+            </form>
+            <form action="{{ url_for('confirmation') }}" method="GET">
+                <div class="col-12 text-center">
+                    <button type="submit" class="btn btn-success mt-3">Proceed to Confirmation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="alert alert-warning text-center" role="alert">
+        No hotel or booking details found. Please go back to <a href="{{ url_for('home') }}" class="alert-link">home page</a> to make a booking.
     </div>
     {% endif %}
 </div>
-
-<script>
-    function bookNow() {
-        alert('Booking confirmed!');
-        window.location.href = '/user_booking';
-    }
-</script>
 {% endblock %}

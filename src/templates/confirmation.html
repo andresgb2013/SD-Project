@@ -1,89 +1,65 @@
 {% extends 'base.html' %}
 
-{% block title %}Booking Confirmation - Trip Booking{% endblock %}
+{% block title %}Confirmation - Trip Booking{% endblock %}
 
 {% block content %}
 <div class="container my-5">
     {% if booking_details %}
-    <div class="alert alert-info" role="alert">
-        <h4 class="alert-heading">Booking Details</h4>
-        <p>Below are your booking details:</p>
-        <hr>
-        <p><strong>Destination:</strong> {{ booking_details.destination }}</p>
-        <p><strong>Check-in:</strong> {{ booking_details.check_in }}</p>
-        <p><strong>Check-out:</strong> {{ booking_details.check_out }}</p>
-        <p><strong>Guests:</strong> {{ booking_details.guests }}</p>
-        <p><strong>Rooms:</strong> {{ booking_details.rooms }}</p>
-        <p><strong>Hotel:</strong> {{ booking_details.hotel_name }}</p>
-        <p><strong>Total Price:</strong> {{ booking_details.hotel_price }} EUR</p>
-        <p><strong>ID:</strong> {{ booking_details.hotel_photos }} </p>
-
-    </div>
-
-    <div class="mt-5">
-        <h4 class="mb-3">Available Photos</h4>
-        <div class="hotel-photos">
-            <img src="{{ url_for('hotel_photo', photo_id= booking_details.hotel_photos) }}" alt="Hotel Photo"
-            class="hotel-photo">
-        </div>
-    </div>
-
-    <div class="mt-5">
-        <h4 class="mb-3">Payment Information</h4>
-        <form action="{{ url_for('confirm_booking') }}" method="POST">
-            <input type="hidden" name="hotel_name" value="{{ booking_details.hotel_name }}">
-            <input type="hidden" name="hotel_price" value="{{ booking_details.hotel_price }}">
-            <div class="mb-3">
-                <label for="payment_method" class="form-label"><strong>Payment Method:</strong></label>
-                <select id="payment_method" name="payment_method" class="form-select" required>
-                    <option value="">Select Payment Method</option>
-                    <option value="Credit Card">Credit Card</option>
-                    <option value="Debit Card">Debit Card</option>
-                    <option value="PayPal">PayPal</option>
-                </select>
+    <div class="card mb-5">
+        <div class="card-body">
+            <h2 class="card-title mb-4 text-center">{{ booking_details.hotel_name }}</h2>
+            <div class="hotel-photos mb-4">
+                {% for photo_id in booking_details.hotel_photos %}
+                <img src="{{ url_for('hotel_photo', photo_id=photo_id) }}" alt="Hotel Photo" class="hotel-photo">
+                {% endfor %}
             </div>
+            
+            <h4 class="mb-3">Your Trip</h4>
+            <p><strong>Check-in:</strong> {{ booking_details.check_in }} at 3 PM</p>
+            <p><strong>Check-out:</strong> {{ booking_details.check_out }}</p>
+            <p><strong>Guests:</strong> {{ booking_details.guests }}</p>
+            <p><strong>Rooms:</strong> {{ booking_details.rooms }}</p>
+            
+            <h4 class="mb-3">Price Details</h4>
+            <p><strong>Total Price:</strong> {{ booking_details.total_price }} EUR</p>
+            
+            <h4 class="mb-3">Payment Information</h4>
+            <form action="{{ url_for('confirm_booking') }}" method="POST">
+                <div class="mb-3">
+                    <label for="payment_method" class="form-label"><strong>Payment Method:</strong></label>
+                    <select id="payment_method" name="payment_method" class="form-select" required>
+                        <option value="">Select Payment Method</option>
+                        <option value="Credit Card">Credit Card</option>
+                        <option value="Debit Card">Debit Card</option>
+                        <option value="PayPal">PayPal</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="card_number" class="form-label"><strong>Card Number:</strong></label>
+                    <input type="text" id="card_number" name="card_number" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="expiration_date" class="form-label"><strong>Expiration Date:</strong></label>
+                    <input type="text" id="expiration_date" name="expiration_date" class="form-control" placeholder="MM/YY" required>
+                </div>
+                <div class="mb-3">
+                    <label for="cvv" class="form-label"><strong>CVV:</strong></label>
+                    <input type="text" id="cvv" name="cvv" class="form-control" required>
+                </div>
 
-            <div class="mb-3">
-                <label for="card_number" class="form-label"><strong>Card Number:</strong></label>
-                <input type="text" id="card_number" name="card_number" class="form-control" required>
-            </div>
-
-            <div class="mb-3">
-                <label for="expiration_date" class="form-label"><strong>Expiration Date:</strong></label>
-                <input type="text" id="expiration_date" name="expiration_date" class="form-control" placeholder="MM/YY" required>
-            </div>
-
-            <div class="mb-3">
-                <label for="cvv" class="form-label"><strong>CVV:</strong></label>
-                <input type="text" id="cvv" name="cvv" class="form-control" required>
-            </div>
-
-            <div class="mt-5">
                 <h5 class="mb-3">Cancellation Policy</h5>
                 <p class="small">
                     You can cancel your booking up to 24 hours before check-in time for a full refund. After that, a cancellation fee equal to one night's stay will apply.
                 </p>
-            </div>
 
-            {% if current_user.is_authenticated %}
-            <button type="submit" class="btn btn-primary">Confirm Booking</button>
-            {% else %}
-            <div class="alert alert-warning" role="alert">
-                You need to <a href="{{ url_for('login') }}" class="alert-link">login</a> to confirm your booking.
-            </div>
-            {% endif %}
-        </form>
+                <button type="submit" class="btn btn-primary">Confirm Booking</button>
+            </form>
+        </div>
     </div>
-
-    <a href="{{ url_for('booking') }}" class="btn btn-secondary mt-3">Back to Booking</a>
-
     {% else %}
-    <div class="alert alert-warning" role="alert">
+    <div class="alert alert-warning text-center" role="alert">
         No booking details found. Please go back to <a href="{{ url_for('home') }}" class="alert-link">home page</a> to make a booking.
     </div>
     {% endif %}
 </div>
-
-
-
 {% endblock %}

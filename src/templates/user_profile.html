@@ -1,89 +1,36 @@
 {% extends 'base.html' %}
 
-{% block title %}User Profile - Travel Booking{% endblock %}
+{% block title %}User Profile - Trip Booking{% endblock %}
 
 {% block content %}
-
-<head>
-    <style>
-        .profile-container {
-            width: 50%;
-            margin: auto;
-            padding: 20px;
-            text-align: center;
-        }
-        .profile-container .field-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 10px auto;
-        }
-        .profile-container input[type="text"], 
-        .profile-container input[type="email"], 
-        .profile-container input[type="password"] {
-            width: calc(80% - 20px);
-            padding: 10px;
-            margin-right: 10px;
-        }
-        .profile-container .button {
-            margin: 10px;
-        }
-        .button {
-            display: inline-block;
-            background: #e8491d;
-            color: #fff;
-            padding: 10px 20px;
-            text-align: center;
-            cursor: pointer;
-            border: none;
-            margin: 5px 0;
-        }
-        .small-btn {
-            display: inline-block;
-            text-align: center;
-            padding: 5px 10px;
-            margin: 0;
-        }
-    </style>
-</head>
-
-<div class="row justify-content-center">
-    <div class="col-md-10">
-        <div class="card">
-            <div class="profile-container">
-                <div class="field-container">
-                    <button class="btn btn-primary mx-2" onclick="window.location.href='/user_profile'">My profile</button>
-                    <button class="btn btn-primary mx-2" onclick="window.location.href='/user_booking'">My Booking</button>
+<div class="container my-5">
+    <h2 class="text-center mb-4">Your Reservations</h2>
+    {% if reservations %}
+    <div class="row">
+        {% for reservation in reservations %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="hotel-photos mb-3">
+                    {% for photo_id in reservation.hotel_photos %}
+                    <img src="{{ url_for('hotel_photo', photo_id=photo_id) }}" alt="Hotel Photo" class="hotel-photo">
+                    {% endfor %}
                 </div>
-                <form>
-                    <div class="field-container">
-                        <input type="text" id="name" name="name" placeholder="Name">
-                        <button class="btn btn-primary mx-2" type="button" onclick="editField('name')">Edit</button>
-                    </div>
-                    <div class="field-container">
-                        <input type="email" id="email" name="email" placeholder="Email">
-                        <button class="btn btn-primary mx-2" type="button" onclick="editField('email')">Edit</button>
-                    </div>
-                    <button class="btn btn-primary mx-2" type="button" onclick="saveProfile()">Save</button>
-                </form>
-                <div class="logout">
-                    <!-- <button class="btn btn-danger mx-2" onclick="logout()">Logout</button> -->
-                    <button class="btn btn-danger mx-2" onclick="window.location.href='/logout'">Logout</button>
+                <div class="card-body">
+                    <h5 class="card-title">{{ reservation.hotel_name }}</h5>
+                    <p class="card-text"><strong>Check-in:</strong> {{ reservation.check_in }}</p>
+                    <p class="card-text"><strong>Check-out:</strong> {{ reservation.check_out }}</p>
+                    <p class="card-text"><strong>Guests:</strong> {{ reservation.guests }}</p>
+                    <p class="card-text"><strong>Rooms:</strong> {{ reservation.rooms }}</p>
+                    <p class="card-text"><strong>Total Price:</strong> {{ reservation.total_price }} EUR</p>
                 </div>
             </div>
         </div>
+        {% endfor %}
     </div>
+    {% else %}
+    <div class="alert alert-warning text-center" role="alert">
+        No reservations found. Please make a booking first.
+    </div>
+    {% endif %}
 </div>
-<script>
-    function editField(fieldId) {
-        document.getElementById(fieldId).disabled = false;
-        document.getElementById(fieldId).focus();
-    }
-
-    function saveProfile() {
-        alert('Profile saved successfully!');
-        window.location.href = '/user_profile';
-    }
-</script>
-
 {% endblock %}

@@ -2,7 +2,7 @@
 
 {% block title %}Add Hotel - Travel Booking{% endblock %}
 
-{% block content %}
+{% block additional_css %}
 <style>
     .editing-container {
         width: 60%;
@@ -16,20 +16,15 @@
         justify-content: space-between;
         margin: 10px auto;
     }
-    .editing-container input[type="text"], 
-    .editing-container input[type="email"], 
-    .editing-container input[type="password"] {
+    .editing-container input[type="text"],
+    .editing-container input[type="email"],
+    .editing-container input[type="password"],
+    .editing-container textarea,
+    .editing-container input[type="number"],
+    .editing-container input[type="file"] {
         width: calc(80% - 20px);
         padding: 10px;
         margin-right: 10px;
-    }
-    .editing-container textarea {
-        width: calc(100% - 20px);
-        padding: 10px;
-        margin: 10px auto;
-    }
-    .editing-container .button {
-        margin: 10px;
     }
     .button {
         display: inline-block;
@@ -41,14 +36,10 @@
         border: none;
         margin: 5px 0;
     }
-    .small-btn {
-        display: inline-block;
-        text-align: center;
-        padding: 5px 10px;
-        margin: 0;
-    }
 </style>
+{% endblock %}
 
+{% block content %}
 <div class="row justify-content-center">
     <div class="col-md-10">
         <div class="card">
@@ -76,30 +67,30 @@
                         <label>Country:</label>
                         <input type="text" name="country" id="country" class="form-control" required>
                     </div>
-                    <label>Photos:</label>
-                    <input type="file" name="photos" id="photo-upload" multiple accept="image/*" class="form-control">
-                    <div id="photo-preview" class="photo-preview"></div>
-                    <label>Description:</label>
-                    <textarea name="description" id="description" class="form-control" required></textarea>
-                    <label>Extra Info:</label>
-                    <textarea name="extra_info" id="extra-info" class="form-control"></textarea>
-                    <label>No. of Guests:</label>
-                    <input type="number" name="no_of_guests" id="no-of-guests" class="form-control" required>
-                    <label>Price / Night:</label>
-                    <input type="number" name="price_per_night" id="price-per-night" class="form-control" required>
+                    <div class="field-container">
+                        <label>Photos:</label>
+                        <input type="file" name="photos" id="photo-upload" multiple accept="image/*" class="form-control">
+                    </div>
+                    <div class="field-container">
+                        <label>Description:</label>
+                        <textarea name="description" id="description" class="form-control" required></textarea>
+                    </div>
+                    <div class="field-container">
+                        <label>Extra Info:</label>
+                        <textarea name="extra_info" id="extra-info" class="form-control"></textarea>
+                    </div>
+                    <div class="field-container">
+                        <label>No. of Guests:</label>
+                        <input type="number" name="no_of_guests" id="no-of-guests" class="form-control" required>
+                        <label>Price / Night:</label>
+                        <input type="number" name="price_per_night" id="price-per-night" class="form-control" required>
+                    </div>
                     <button class="btn btn-primary" type="submit">Save</button>
-                    <button class="btn btn-danger" type="button" onclick="deletePlace()">Delete</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
 
-<script>
-    function deletePlace() {
-        alert('Place deleted successfully!');
-        window.location.href = '/manager_listing';
-    }
-</script>
 
 {% endblock %}

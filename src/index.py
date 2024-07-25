@@ -1,13 +1,11 @@
-from flask import Flask, render_template, redirect, url_for, request, flash, session
+from flask import Flask, render_template, redirect, url_for, request, flash, session, send_file
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 import os
 import pymongo
 from bson.objectid import ObjectId
-from werkzeug.utils import secure_filename
-
-from flask import send_file
 import gridfs
 
 
@@ -15,21 +13,22 @@ import gridfs
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'your_secret_key')
 
+# Configuración de Flask-Login
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-
 # Configuración de la conexión a MongoDB
 client = pymongo.MongoClient('mongodb+srv://andresgb2013:DN0kJdOtj5eJmoo3@cluster0.jzfu1jp.mongodb.net/')
-db = client['SD_Project']  # Reemplaza 'your_database_name' con el nombre de tu base de datos
+db = client['SD_Project']
 users_collection = db['users']
 hotels_collection = db['hotels']
-
+reservations_collection = db['reservations']
 fs = gridfs.GridFS(db)
 
+
 class User(UserMixin):
-    def __init__(self, user_id, name,lastname, email, password_hash, auth_level):
+    def __init__(self, user_id, name, lastname, email, password_hash, auth_level):
         self.id = user_id
         self.name = name
         self.lastname = lastname
@@ -48,13 +47,13 @@ class User(UserMixin):
             auth_level=doc['auth_level']
         )
 
-
 @login_manager.user_loader
 def load_user(user_id):
     user_doc = users_collection.find_one({'_id': ObjectId(user_id)})
     if user_doc:
         return User.from_mongo(user_doc)
     return None
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -77,12 +76,11 @@ def login():
             flash('Invalid credentials')
     return render_template('login.html')
 
-
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         name = request.form['name']
-        lastName = request.form['lastname']
+        lastname = request.form['lastname']
         email = request.form['email']
         password = request.form['password']
         confirm_password = request.form['confirm_password']
@@ -90,19 +88,17 @@ def register():
         existing_user = users_collection.find_one({'email': email})
         if existing_user:
             flash('Email address already registered', 'error')
-                # Validar longitud mínima de contraseña
         elif len(password) < 8:
             flash('Password must be at least 8 characters long', 'error')
-            return redirect(url_for('register'))
-        elif password!= confirm_password:
+        elif password != confirm_password:
             flash('Passwords do not match', 'error')
         else:
             user_data = {
                 'name': name,
-                'lastname': lastName,
+                'lastname': lastname,
                 'email': email,
                 'password_hash': generate_password_hash(password),
-                'auth_level': 'regular'  # Valor predeterminado
+                'auth_level': 'regular'
             }
             users_collection.insert_one(user_data)
             flash('User registered successfully')
@@ -115,12 +111,18 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
+#Rutas de la Aplicación
+@app.route('/')
+def home():
+    return render_template('home.html')
+
 @app.route('/user_profile')
 @login_required
 def user_profile():
-    if session.get('authenticated'):
-        return redirect(url_for('login'))
-    return render_template('user_profile.html')
+    user_id = current_user.get_id()
+    reservations = list(reservations_collection.find({'user_id': user_id}))
+
+    return render_template('user_profile.html', reservations=reservations)
 
 @app.route('/user_booking')
 def user_booking():
@@ -134,14 +136,10 @@ def booking_cancel():
         return redirect(url_for('login'))
     return render_template('booking_cancel.html')
 
-@app.route('/')
-def home():
-    return render_template('home.html')
 
 @app.route('/booking', methods=['GET', 'POST'])
 def booking():
     if request.method == 'POST':
-        # Lógica existente para manejar el formulario de búsqueda
         destination = request.form['destination']
         check_in = request.form['check_in']
         check_out = request.form['check_out']
@@ -157,86 +155,98 @@ def booking():
         }
 
         session['booking_details'] = booking_details
-
         hotels = list(hotels_collection.find({'address.city': destination}))
-
         return render_template('booking.html', booking_details=booking_details, hotels=hotels)
 
     elif request.method == 'GET':
-        # Lógica para manejar la solicitud GET desde "Popular Destinations"
         destination = request.args.get('destination')
         if destination:
+            check_in = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%d')
+            check_out = (datetime.utcnow() + timedelta(days=2)).strftime('%Y-%m-%d')
+            booking_details = {
+                'destination': destination,
+                'check_in': check_in,
+                'check_out': check_out,
+                'guests': 1,
+                'rooms': 1
+            }
+            session['booking_details'] = booking_details
             hotels = list(hotels_collection.find({'address.city': destination}))
-
-            return render_template('booking.html', destination=destination, hotels=hotels)
+            return render_template('hotels_testing.html', destination=destination, hotels=hotels, booking_details=booking_details)
 
     return redirect(url_for('home'))
 
 
-
 @app.route('/hotel_info', methods=['GET', 'POST'])
-@login_required
 def hotel_info():
     if request.method == 'POST':
-        hotel_name = request.form['hotel_name']
-        hotel_price = float(request.form['hotel_price'])
-        hotel_photos= request.form['hotel_photos']
-
-        booking_details = session.get('booking_details', {})
-        if not booking_details:
-            flash('No booking details found. Please start your booking again.')
+        try:
+            hotel_id = request.form.get('hotel_id')
+            if not hotel_id:
+                raise ValueError('No hotel_id provided')
+            hotel_object_id = ObjectId(hotel_id)
+        except (ValueError, Exception) as e:
+            flash('Invalid hotel ID format. Please start your booking again.')
             return redirect(url_for('home'))
 
-        check_in = datetime.strptime(booking_details['check_in'], '%Y-%m-%d')
-        check_out = datetime.strptime(booking_details['check_out'], '%Y-%m-%d')
-        num_nights = (check_out - check_in).days
+        hotel_name = request.form['hotel_name']
+        hotel_price = float(request.form['hotel_price'])
+        hotel_photos = request.form.getlist('hotel_photos')
 
-        total_price = hotel_price * num_nights
+        # Update booking details from the form
+        check_in = request.form.get('check_in')
+        check_out = request.form.get('check_out')
+        guests = request.form.get('guests')
+        rooms = request.form.get('rooms')
 
-        booking_details['hotel_name'] = hotel_name
-        booking_details['hotel_price'] = total_price
-        booking_details['hotel_photos']= hotel_photos
+        booking_details = {
+            'destination': session['booking_details'].get('destination', ''),
+            'check_in': check_in,
+            'check_out': check_out,
+            'guests': guests,
+            'rooms': rooms,
+            'hotel_name': hotel_name,
+            'hotel_price': hotel_price,
+            'hotel_photos': hotel_photos
+        }
+
+        # Calculate the total price
+        check_in_date = datetime.strptime(check_in, '%Y-%m-%d')
+        check_out_date = datetime.strptime(check_out, '%Y-%m-%d')
+        num_nights = (check_out_date - check_in_date).days
+        booking_details['hotel_price'] = hotel_price * num_nights
+
+        # Save updated booking details to the session
         session['booking_details'] = booking_details
 
-        flash('Booking confirmed!')
-        return redirect(url_for('confirmation'))
+        flash('Booking details updated successfully!')
+        return render_template('hotel_info.html', hotel=hotels_collection.find_one({'_id': hotel_object_id}), booking_details=booking_details)
+
+    try:
+        hotel_id = request.args.get('hotel_id')
+        if not hotel_id:
+            raise ValueError('No hotel_id provided')
+        hotel_object_id = ObjectId(hotel_id)
+    except (ValueError, Exception) as e:
+        flash('Invalid hotel ID format. Please start your booking again.')
+        return redirect(url_for('home'))
+
+    hotel = hotels_collection.find_one({'_id': hotel_object_id})
+    if not hotel:
+        flash('Hotel not found. Please start your booking again.')
+        return redirect(url_for('home'))
 
     booking_details = session.get('booking_details', {})
     if not booking_details:
         flash('No booking details found. Please start your booking again.')
         return redirect(url_for('home'))
 
+    return render_template('hotel_info.html', hotel=hotel, booking_details=booking_details)
 
-    return render_template('hotel_info.html', booking_details=booking_details)
 
 
-@app.route('/confirmation', methods=['GET', 'POST'])
-@login_required
+@app.route('/confirmation')
 def confirmation():
-    if request.method == 'POST':
-        hotel_name = request.form['hotel_name']
-        hotel_price = float(request.form['hotel_price'])
-        hotel_photos= request.form['hotel_photos']
-
-        booking_details = session.get('booking_details', {})
-        if not booking_details:
-            flash('No booking details found. Please start your booking again.')
-            return redirect(url_for('home'))
-
-        check_in = datetime.strptime(booking_details['check_in'], '%Y-%m-%d')
-        check_out = datetime.strptime(booking_details['check_out'], '%Y-%m-%d')
-        num_nights = (check_out - check_in).days
-
-        total_price = hotel_price * num_nights
-
-        booking_details['hotel_name'] = hotel_name
-        booking_details['hotel_price'] = total_price
-        booking_details['hotel_photos']= hotel_photos
-        session['booking_details'] = booking_details
-
-        flash('Booking confirmed!')
-        return redirect(url_for('confirmation'))
-
     booking_details = session.get('booking_details', {})
     if not booking_details:
         flash('No booking details found. Please start your booking again.')
@@ -244,17 +254,33 @@ def confirmation():
 
     return render_template('confirmation.html', booking_details=booking_details)
 
-
 @app.route('/confirm_booking', methods=['POST'])
-@login_required
 def confirm_booking():
-    if request.method == 'POST':
-        session['booking_confirmed'] = True
-        return redirect(url_for('confirmation'))
+    booking_details = session.get('booking_details', {})
+    if not booking_details:
+        flash('No booking details found. Please start your booking again.')
+        return redirect(url_for('home'))
 
-    flash('Failed to confirm booking.')
-    return redirect(url_for('confirmation'))
+    user_id = current_user.get_id()
 
+    reservation = {
+        'user_id': user_id,
+        'hotel_name': booking_details['hotel_name'],
+        'check_in': booking_details['check_in'],
+        'check_out': booking_details['check_out'],
+        'guests': booking_details['guests'],
+        'rooms': booking_details['rooms'],
+        'total_price': booking_details['hotel_price'],
+        'hotel_photos': booking_details['hotel_photos'],
+        'created_at': datetime.now()
+    }
+
+    reservations_collection.insert_one(reservation)
+    flash('Booking confirmed!')
+
+    return redirect(url_for('user_profile'))
+
+#Rutas de Gestión de Usuarios
 @app.route('/manager_profile')
 def manager_profile():
     return render_template('manager_profile.html')
@@ -288,7 +314,6 @@ def super_listing():
         flash("Access Denied: You don't have the necessary permissions.", 'danger')
         return redirect(url_for('login'))
 
-    # Sample data for managers and cities
     managers = [{'name': 'John Doe', 'details': 'Manager of City A'}]
     cities = [{'name': 'City A', 'details': 'Details of City A'}]
     return render_template('super_listing.html', managers=managers, cities=cities)
@@ -311,7 +336,7 @@ def super_add_manager():
     
     if request.method == 'POST':
         name = request.form['name']
-        lastName = request.form['lastname']
+        lastname = request.form['lastname']
         email = request.form['email']
         password = request.form['password']
         confirm_password = request.form['confirm_password']
@@ -326,10 +351,10 @@ def super_add_manager():
         else:
             user_data = {
                 'name': name,
-                'lastname': lastName,
+                'lastname': lastname,
                 'email': email,
                 'password_hash': generate_password_hash(password),
-                'auth_level': 'manager_user'  # Asignar nivel de autorización de manager
+                'auth_level': 'manager_user'
             }
             users_collection.insert_one(user_data)
             flash('Manager added successfully', 'success')
@@ -337,9 +362,9 @@ def super_add_manager():
     
     return render_template('super_add_manager.html')
 
+# Rutas de Gestión de Hoteles
 @app.route('/create_hotel', methods=['GET', 'POST'])
 @login_required
-
 def create_hotel():
     if current_user.auth_level != 'manager_user':
         flash("Access Denied: You don't have the necessary permissions.", 'danger')
@@ -388,34 +413,31 @@ def create_hotel():
 
     return render_template('create_hotel.html')
 
-
 @app.route('/add_hotel', methods=['GET', 'POST'])
 def add_hotel():
     if request.method == 'POST':
         title = request.form['title']
         street1 = request.form['street1']
-        street2 = request.form.get('street2', '')  # Campo opcional
-        street3 = request.form.get('street3', '')  # Campo opcional
+        street2 = request.form.get('street2', '')
+        street3 = request.form.get('street3', '')
         postal_code = request.form['postal_code']
         city = request.form['city']
         country = request.form['country']
         description = request.form['description']
-        extra_info = request.form.get('extra_info', '')  # Campo opcional
+        extra_info = request.form.get('extra_info', '')
         no_of_guests = int(request.form['no_of_guests'])
         price_per_night = float(request.form['price_per_night'])
         
         photos = request.files.getlist('photos')
         photo_ids = []
 
-        # Guardar fotos en MongoDB usando GridFS
         for photo in photos:
             if photo.filename == '':
-                continue  # Ignorar archivos no seleccionados
+                continue
             filename = secure_filename(photo.filename)
             file_id = fs.put(photo, filename=filename)
             photo_ids.append(file_id)
 
-        # Crear el documento del hotel
         hotel_data = {
             'title': title,
             'address': {
@@ -433,7 +455,6 @@ def add_hotel():
             'price_per_night': price_per_night
         }
 
-        # Insertar el documento en la colección de hoteles
         db.hotels.insert_one(hotel_data)
         flash('Hotel added successfully!')
         return redirect(url_for('home'))
@@ -446,33 +467,19 @@ def hotels():
     hotels_list = []
 
     for hotel in all_hotels:
-        # Convert ObjectId to string for JSON serialization
         hotel['_id'] = str(hotel['_id'])
         hotel['photos'] = [str(photo_id) for photo_id in hotel['photos']]
         hotels_list.append(hotel)
 
     return render_template('hotels_testing.html', hotels=hotels_list)
 
-
-
 @app.route('/hotel_photo/<photo_id>')
 def hotel_photo(photo_id):
     photo = fs.get(ObjectId(photo_id))
     return send_file(photo, mimetype='image/jpeg')
 
-@app.route('/hotels_city', methods=['GET', 'POST'])
-def hotels_city():
-    city = request.form.get('city')
-    query = {}  # Consulta vacía por defecto
 
-
-    if city:
-        query['address.city'] = city
-
-    hotels = hotels_collection.find(query)
-    return render_template('hotels_testing.html', hotels=hotels)
-
-
-
+#Ejecución de la Aplicación
 if __name__ == '__main__':
     app.run(debug=True)
+

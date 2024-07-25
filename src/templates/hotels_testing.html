@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Hotels - Travel Booking{% endblock %}
+{% block title %}Hotels in {{ destination }} - Travel Booking{% endblock %}
 
 {% block content %}
 <style>
@@ -26,50 +26,41 @@
     .hotel-details {
         text-align: left;
     }
-    .city-dropdown {
-        margin-bottom: 20px;
-        text-align: center;
-    }
-    .city-dropdown select {
-        padding: 10px;
-        font-size: 16px;
-    }
 </style>
 
 <div class="hotel-container">
-    <h2>Our Hotels</h2>
-
-    <div class="city-dropdown">
-        <form method="POST" action="{{ url_for('hotels_city') }}">
-            <div class="col-md-3 mx-auto">
-                <select class="form-select" name="city" required onchange="this.form.submit()">
-                    <option value="">Select Destination</option>
-                    <option value="Berlin">Berlin</option>
-                    <option value="Munich">Munich</option>
-                    <option value="Hamburg">Hamburg</option>
-                    <option value="Frankfurt">Frankfurt</option>
-                </select>
-            </div>
-        </form>
-    </div>
+    <h2>Hotels in {{ destination }}</h2>
 
     {% for hotel in hotels %}
     <div class="hotel-card">
         <h3>{{ hotel.title }}</h3>
         <div class="hotel-details">
-            <p><strong>Address:</strong> {{ hotel.address.street1 }}, {{ hotel.address.street2 }}, {{ hotel.address.street3 }}, {{ hotel.address.city }}, {{ hotel.address.postal_code }}, {{ hotel.address.country }}</p>
+            <p><strong>Address:</strong> {{ hotel.address.street1 }}, {{ hotel.address.city }}, {{ hotel.address.country }}</p>
             <p><strong>Description:</strong> {{ hotel.description }}</p>
-            <p><strong>Extra Info:</strong> {{ hotel.extra_info }}</p>
-            <p><strong>Number of Guests:</strong> {{ hotel.no_of_guests }}</p>
             <p><strong>Price per Night:</strong> ${{ hotel.price_per_night }}</p>
+            <p><strong>ID:</strong> ${{ hotel._id }}</p>
+
         </div>
         <div class="hotel-photos">
             {% for photo_id in hotel.photos %}
             <img src="{{ url_for('hotel_photo', photo_id=photo_id) }}" alt="Hotel Photo">
             {% endfor %}
         </div>
+        <form method="POST" action="{{ url_for('hotel_info') }}">
+            <input type="hidden" name="hotel_name" value="{{ hotel.title }}">
+            <input type="hidden" name="hotel_price" value="{{ hotel.price_per_night }}">
+            <input type="hidden" name="hotel_photos" value="{{ hotel.photos | join(',') }}">
+            <input type="hidden" name="hotel_id" value="{{ hotel._id }}">
+            
+            <!-- Ensure we pass booking details along with the form -->
+            <input type="hidden" name="check_in" value="{{ booking_details.check_in }}">
+            <input type="hidden" name="check_out" value="{{ booking_details.check_out }}">
+            <input type="hidden" name="guests" value="{{ booking_details.guests }}">
+            <input type="hidden" name="rooms" value="{{ booking_details.rooms }}">
+
+            <button type="submit" class="btn btn-primary mt-3">Book Now</button>
+        </form>
     </div>
     {% endfor %}
 </div>
 {% endblock %}
-

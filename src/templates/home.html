@@ -51,15 +51,17 @@
         </div>
     </form>
 </section>
+<!-- Popular Destinations Section -->
 <section id="destinations" class="mt-5">
     <h2 class="h4 mb-3">Popular Destinations</h2>
     <ul class="list-group" name="destination">
-        <li class="list-group-item"><a href="{{ url_for('booking', destination='Berlin') }}" method="POST">Berlin</a></li>
+        <li class="list-group-item"><a href="{{ url_for('booking', destination='Berlin') }}">Berlin</a></li>
         <li class="list-group-item"><a href="{{ url_for('booking', destination='Munich') }}">Munich</a></li>
         <li class="list-group-item"><a href="{{ url_for('booking', destination='Hamburg') }}">Hamburg</a></li>
-        <li class="list-group-item"><a href="{{ url_for('booking', destination='Munich') }}">Frankfurt</a></li>
+        <li class="list-group-item"><a href="{{ url_for('booking', destination='Frankfurt') }}">Frankfurt</a></li>
     </ul>
 </section>
+
 {% endblock %}
 
 {% block additional_js %}

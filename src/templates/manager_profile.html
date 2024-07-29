@@ -3,87 +3,37 @@
 {% block title %}Manager Profile - Travel Booking{% endblock %}
 
 {% block content %}
-    
-    <style>
-        .profile-container {
-            width: 50%;
-            margin: auto;
-            padding: 20px;
-            text-align: center;
-        }
-        .profile-container .field-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 10px auto;
-        }
-        .profile-container input[type="text"], 
-        .profile-container input[type="password"] {
-            width: calc(80% - 20px);
-            padding: 10px;
-            margin-right: 10px;
-        }
-        .profile-container .button {
-            margin: 10px;
-        }
-        .button {
-            display: inline-block;
-            background: #e8491d;
-            color: #fff;
-            padding: 10px 20px;
-            text-align: center;
-            cursor: pointer;
-            border: none;
-            margin: 5px 0;
-        }
-        .small-btn {
-            display: inline-block;
-            text-align: center;
-            padding: 5px 10px;
-            margin: 0;
-        }
-    </style>
-
-<div class="row justify-content-center">
-    <div class="col-md-10">
-        <div class="card">
-            <div class="profile-container">
-                <div class="field-container">
-                    <!-- <button class="btn btn-primary mx-2" onclick="window.location.href='/manager_profile'">My profile</button> -->
-                    <button class="btn btn-primary mx-2" onclick="window.location.href='/manager_listing'">My Hotels</button>
+<div class="container my-5">
+    <h2 class="text-center mb-4">Manager Profile</h2>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4 class="card-title">Profile Information</h4>
+            <form action="{{ url_for('manager_profile') }}" method="POST">
+                <input type="hidden" name="update_profile" value="1">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Full Name</label>
+                    <input type="text" class="form-control" id="name" name="name" value="{{ user_data.name }}" required>
                 </div>
-                <form>
-                    <div class="field-container">
-                        <input type="text" id="username" name="username" placeholder="Email">
-                        <button class="btn btn-primary mx-2" type="button" onclick="editField('username')">Edit</button>
-                    </div>
-                    <div class="field-container">
-                        <input type="password" id="password" name="password" placeholder="Password">
-                        <button class="btn btn-primary mx-2" type="button" onclick="editField('password')">Edit</button>
-                    </div>
-                    <button class="btn btn-primary mx-2" type="button" onclick="saveProfile()">Save</button>
-                </form>
-                <div class="logout">
-                    <button class="btn btn-danger mx-2" onclick="logout()">Logout</button>
+                <div class="mb-3">
+                    <label for="lastname" class="form-label">Last Name</label>
+                    <input type="text" class="form-control" id="lastname" name="lastname" value="{{ user_data.lastname }}" required>
                 </div>
-            </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ user_data.email }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="current_password" class="form-label">Current Password</label>
+                    <input type="password" class="form-control" id="current_password" name="current_password" required>
+                </div>
+                <div class="mb-3">
+                    <label for="new_password" class="form-label">New Password (leave blank to keep current password)</label>
+                    <input type="password" class="form-control" id="new_password" name="new_password">
+                </div>
+                <button type="submit" class="btn btn-primary">Update Profile</button>
+            </form>
+            <button class="btn btn-secondary mt-3" onclick="window.location.href='/manager_listing'">My Hotels</button>
         </div>
     </div>
 </div>
-<script>
-    function editField(fieldId) {
-        document.getElementById(fieldId).focus();
-    }
-
-    function saveProfile() {
-        alert('Profile saved successfully!');
-        window.location.href = '/manager_profile';
-    }
-
-    function logout() {
-        alert('You have been logged out!');
-        window.location.href = '/login';
-    }
-</script>
-
 {% endblock %}

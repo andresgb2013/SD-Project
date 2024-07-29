@@ -317,22 +317,94 @@ def confirm_booking():
     return redirect(url_for('user_profile'))
 
 #Rutas de Gestión de Usuarios
-@app.route('/manager_profile')
+@app.route('/manager_profile', methods=['GET', 'POST'])
+@login_required
 def manager_profile():
-    return render_template('manager_profile.html')
+    user_id = current_user.get_id()
+    user_data = db.users.find_one({"_id": ObjectId(user_id)})
+    
+    if request.method == 'POST':
+        if 'update_profile' in request.form:
+            name = request.form.get('name')
+            lastname = request.form.get('lastname')
+            email = request.form.get('email')
+            current_password = request.form.get('current_password')
+            new_password = request.form.get('new_password')
+
+            if not check_password_hash(user_data['password'], current_password):
+                flash('Current password is incorrect!')
+                return redirect(url_for('manager_profile'))
+
+            update_data = {
+                "name": name,
+                "lastname": lastname,
+                "email": email
+            }
+            if new_password:
+                update_data["password"] = generate_password_hash(new_password)
+
+            db.users.update_one({"_id": ObjectId(user_id)}, {"$set": update_data})
+            flash("Profile updated successfully!")
+            return redirect(url_for('manager_profile'))
+
+    return render_template('manager_profile.html', user_data=user_data)
 
 @app.route('/manager_listing')
-def manager_listing():
-    return render_template('manager_listing.html')
-
-@app.route('/manager_hotel_editing')
 @login_required
-def manager_hotel_editing():
-    if current_user.auth_level != 'manager_user':
-        flash("Access Denied: You don't have the necessary permissions.", 'danger')
-        return redirect(url_for('login'))
+def manager_listing():
+    hotels = db.hotels.find()
+    hotels_by_city = {}
+    for hotel in hotels:
+        city = hotel['address']['city']
+        if city not in hotels_by_city:
+            hotels_by_city[city] = []
+        hotels_by_city[city].append(hotel)
+    return render_template('manager_listing.html', hotels_by_city=hotels_by_city)
 
-    return render_template('manager_hotel_editing.html')
+
+@app.route('/manager_hotel_editing/<hotel_id>', methods=['GET', 'POST'])
+@login_required
+def manager_hotel_editing(hotel_id):
+    if request.method == 'POST':
+        title = request.form['title']
+        street1 = request.form['street1']
+        street2 = request.form.get('street2', '')
+        street3 = request.form.get('street3', '')
+        city = request.form['city']
+        country = request.form['country']
+        description = request.form['description']
+        extra_info = request.form.get('extra_info', '')
+        no_of_guests = int(request.form['no_of_guests'])
+        price_per_night = float(request.form['price_per_night'])
+        
+        update_data = {
+            'title': title,
+            'address': {
+                'street1': street1,
+                'street2': street2,
+                'street3': street3,
+                'city': city,
+                'country': country
+            },
+            'description': description,
+            'extra_info': extra_info,
+            'no_of_guests': no_of_guests,
+            'price_per_night': price_per_night
+        }
+
+        db.hotels.update_one({"_id": ObjectId(hotel_id)}, {"$set": update_data})
+        flash('Hotel updated successfully!')
+        return redirect(url_for('manager_listing'))
+
+    hotel = db.hotels.find_one({"_id": ObjectId(hotel_id)})
+    return render_template('hotel_editing.html', hotel=hotel)
+
+@app.route('/delete_hotel/<hotel_id>', methods=['POST'])
+@login_required
+def delete_hotel(hotel_id):
+    db.hotels.delete_one({"_id": ObjectId(hotel_id)})
+    flash('Hotel deleted successfully!')
+    return redirect(url_for('manager_listing'))
 
 @app.route('/super_profile')
 @login_required

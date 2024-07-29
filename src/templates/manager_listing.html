@@ -3,98 +3,29 @@
 {% block title %}Manager Listing - Travel Booking{% endblock %}
 
 {% block content %}
-
-<style>
-    .listing-container {
-        width: 60%;
-        margin: auto;
-        padding: 20px;
-        text-align: center;
-    }
-    .listing-container .button-container {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 20px;
-    }
-    .listing-container .entry-container {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin: 10px auto;
-        padding: 10px;
-        border: 1px solid #000;
-        border-radius: 5px;
-        width: 100%;
-    }
-    .listing-container .entry-container img {
-        width: 100px;
-        height: 100px;
-        margin-right: 20px;
-    }
-    .listing-container .entry-container .details {
-        flex: 1;
-        text-align: left;
-    }
-    .listing-container .entry-container .details h4 {
-        margin: 0;
-    }
-</style>
-
-
-    <div class="listing-container">
-        <div class="button-container">
-            <button class="btn btn-primary mx-2" onclick="window.location.href='/manager_profile'">My profile</button>
-            <button class="btn btn-primary" onclick="addNewPlace()">Add New Place</button>
-        </div>
-        <div class="entry-container" onclick="editPlace(1)">
-            <img src="hotel_image.jpg" alt="Hotel Image">
-            <div class="details">
-                <h4>Hotel 1 Name</h4>
-                <p>Description:</p>
+<div class="container my-5">
+    <h2 class="text-center mb-4">Hotel Listings</h2>
+    {% for city, hotels in hotels_by_city.items() %}
+    <h3>{{ city }}</h3>
+    <div class="row">
+        {% for hotel in hotels %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                {% if hotel.photos %}
+                <img src="{{ url_for('hotel_photo', photo_id=hotel.photos[0]) }}" class="card-img-top" alt="Hotel Photo">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ hotel.title }}</h5>
+                    <p class="card-text">{{ hotel.description }}</p>
+                    <button class="btn btn-primary" onclick="window.location.href='/manager_hotel_editing/{{ hotel._id }}'">Edit</button>
+                    <form action="{{ url_for('delete_hotel', hotel_id=hotel._id) }}" method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </div>
             </div>
         </div>
-        <div class="entry-container" onclick="editPlace(2)">
-            <img src="hotel_image.jpg" alt="Hotel Image">
-            <div class="details">
-                <h4>Hotel 2 Name</h4>
-                <p>Description:</p>
-            </div>
-        </div>
-        <div class="entry-container" onclick="editPlace(3)">
-            <img src="hotel_image.jpg" alt="Hotel Image">
-            <div class="details">
-                <h4>Hotel 3 Name</h4>
-                <p>Description:</p>
-            </div>
-        </div>
-        <div class="entry-container" onclick="editPlace(4)">
-            <img src="hotel_image.jpg" alt="Hotel Image">
-            <div class="details">
-                <h4>Hotel 4 Name</h4>
-                <p>Description:</p>
-            </div>
-        </div>
-        <div class="entry-container" onclick="editPlace(5)">
-            <img src="hotel_image.jpg" alt="Hotel Image">
-            <div class="details">
-                <h4>Hotel 5 Name</h4>
-                <p>Description:</p>
-            </div>
-        </div>
+        {% endfor %}
     </div>
-    <script>
-        function addNewPlace() {
-            ('Redirecting to add new place.');
-            window.location.href = '/manager_hotel_editing';
-        }
-
-        function editPlace(id) {
-            ('Redirecting to edit place ' + id);
-            window.location.href = '/manager_hotel_editing';
-        }
-    </script>
-
-
-
-
+    {% endfor %}
+</div>
 {% endblock %}

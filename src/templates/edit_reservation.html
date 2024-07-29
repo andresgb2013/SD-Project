@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Reservation - Travel Booking{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="text-center mb-4">Edit Reservation</h2>
+
+    <div class="card">
+        <div class="card-body">
+            <form action="{{ url_for('edit_reservation', reservation_id=reservation._id) }}" method="post">
+                <div class="mb-3">
+                    <label for="check_in" class="form-label">Check-in Date</label>
+                    <input type="date" class="form-control" id="check_in" name="check_in" value="{{ reservation.check_in }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="check_out" class="form-label">Check-out Date</label>
+                    <input type="date" class="form-control" id="check_out" name="check_out" value="{{ reservation.check_out }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="guests" class="form-label">Number of Guests</label>
+                    <input type="number" class="form-control" id="guests" name="guests" value="{{ reservation.guests }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="rooms" class="form-label">Number of Rooms</label>
+                    <input type="number" class="form-control" id="rooms" name="rooms" value="{{ reservation.rooms }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="total_price" class="form-label">Total Price</label>
+                    <input type="number" step="0.01" class="form-control" id="total_price" name="total_price" value="{{ reservation.total_price }}" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a href="{{ url_for('manager_bookings') }}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Manager Bookings - Travel Booking{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="text-center mb-4">Manager Bookings</h2>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4 class="card-title">All Reservations</h4>
+            {% if reservations %}
+            <div class="list-group">
+                {% for reservation in reservations %}
+                <div class="list-group-item">
+                    <h5 class="mb-3">Hotel: {{ reservation.hotel_name }}</h5>
+                    <p><strong>Check-in:</strong> {{ reservation.check_in }}</p>
+                    <p><strong>Check-out:</strong> {{ reservation.check_out }}</p>
+                    <p><strong>Guests:</strong> {{ reservation.guests }}</p>
+                    <p><strong>Rooms:</strong> {{ reservation.rooms }}</p>
+                    <p><strong>Total Price:</strong> {{ reservation.total_price }} EUR</p>
+                    
+                    {% set user_id = reservation.user_id|string %}
+                    {% if user_id in users %}
+                    <p><strong>Booked By:</strong> {{ users[user_id].name }} {{ users[user_id].lastname }}</p>
+                    {% else %}
+                    <p><strong>Booked By:</strong> Unknown User</p>
+                    {% endif %}
+                    
+                    <div class="mt-3">
+                        <a href="{{ url_for('edit_reservation', reservation_id=reservation._id) }}" class="btn btn-warning btn-sm">Edit</a>
+                        <form action="{{ url_for('delete_reservation', reservation_id=reservation._id) }}" method="post" style="display:inline;">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-warning text-center" role="alert">
+                No reservations found.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <button class="btn btn-secondary mt-3" onclick="window.location.href='/manager_profile'">Back to Profile</button>
+</div>
+{% endblock %}
+
+

@@ -406,6 +406,57 @@ def delete_hotel(hotel_id):
     flash('Hotel deleted successfully!')
     return redirect(url_for('manager_listing'))
 
+@app.route('/manager_bookings')
+@login_required
+def manager_bookings():
+    # Obtener todas las reservas
+    reservations = list(db.reservations.find())
+
+    # Obtener todos los user_ids de las reservas y convertirlos a ObjectId
+    user_ids = {ObjectId(reservation['user_id']) for reservation in reservations}
+
+    # Obtener información de los usuarios
+    users = {str(user['_id']): user for user in db.users.find({"_id": {"$in": list(user_ids)}})}
+
+    return render_template('manager_bookings.html', reservations=reservations, users=users)
+
+
+@app.route('/edit_reservation/<reservation_id>', methods=['GET', 'POST'])
+@login_required
+def edit_reservation(reservation_id):
+    reservation = db.reservations.find_one({"_id": ObjectId(reservation_id)})
+
+    if request.method == 'POST':
+        check_in = request.form['check_in']
+        check_out = request.form['check_out']
+        guests = int(request.form['guests'])
+        rooms = int(request.form['rooms'])
+        total_price = float(request.form['total_price'])
+        
+        db.reservations.update_one(
+            {"_id": ObjectId(reservation_id)},
+            {"$set": {
+                "check_in": check_in,
+                "check_out": check_out,
+                "guests": guests,
+                "rooms": rooms,
+                "total_price": total_price
+            }}
+        )
+        flash('Reservation updated successfully!')
+        return redirect(url_for('manager_bookings'))
+
+    return render_template('edit_reservation.html', reservation=reservation)
+
+
+@app.route('/delete_reservation/<reservation_id>', methods=['POST'])
+@login_required
+def delete_reservation(reservation_id):
+    db.reservations.delete_one({"_id": ObjectId(reservation_id)})
+    flash('Reservation deleted successfully!')
+    return redirect(url_for('manager_bookings'))
+
+
 @app.route('/super_profile')
 @login_required
 def super_profile():

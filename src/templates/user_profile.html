@@ -4,6 +4,40 @@
 
 {% block content %}
 <div class="container my-5">
+    <h2 class="text-center mb-4">User Profile</h2>
+
+    <!-- User Profile Information -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4 class="card-title">Profile Information</h4>
+            <form action="{{ url_for('user_profile') }}" method="POST">
+                <input type="hidden" name="update_profile" value="1">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Full Name</label>
+                    <input type="text" class="form-control" id="name" name="name" value="{{ user_data.name }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="lastname" class="form-label">Last Name</label>
+                    <input type="text" class="form-control" id="lastname" name="lastname" value="{{ user_data.lastname }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ user_data.email }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="current_password" class="form-label">Current Password</label>
+                    <input type="password" class="form-control" id="current_password" name="current_password" required>
+                </div>
+                <div class="mb-3">
+                    <label for="new_password" class="form-label">New Password (leave blank to keep current password)</label>
+                    <input type="password" class="form-control" id="new_password" name="new_password">
+                </div>
+                <button type="submit" class="btn btn-primary">Update Profile</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- User Reservations -->
     <h2 class="text-center mb-4">Your Reservations</h2>
     {% if reservations %}
     <div class="row">
@@ -22,6 +56,11 @@
                     <p class="card-text"><strong>Guests:</strong> {{ reservation.guests }}</p>
                     <p class="card-text"><strong>Rooms:</strong> {{ reservation.rooms }}</p>
                     <p class="card-text"><strong>Total Price:</strong> {{ reservation.total_price }} EUR</p>
+                    <form action="{{ url_for('user_profile') }}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this booking?');">
+                        <input type="hidden" name="cancel_booking" value="1">
+                        <input type="hidden" name="reservation_id" value="{{ reservation._id }}">
+                        <button type="submit" class="btn btn-danger">Cancel Booking</button>
+                    </form>
                 </div>
             </div>
         </div>

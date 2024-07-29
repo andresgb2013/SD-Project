@@ -5,8 +5,9 @@ from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 import os
 import pymongo
-from bson.objectid import ObjectId
+from bson.objectid import ObjectId, InvalidId
 import gridfs
+from bson.errors import InvalidId
 
 
 
@@ -116,13 +117,48 @@ def logout():
 def home():
     return render_template('home.html')
 
-@app.route('/user_profile')
+@app.route('/user_profile', methods=['GET', 'POST'])
 @login_required
 def user_profile():
     user_id = current_user.get_id()
-    reservations = list(reservations_collection.find({'user_id': user_id}))
+    user_data = db.users.find_one({"_id": ObjectId(user_id)})
+    reservations = list(db.reservations.find({'user_id': user_id}))
 
-    return render_template('user_profile.html', reservations=reservations)
+    if request.method == 'POST':
+        if 'update_profile' in request.form:
+            # Actualizar la información del perfil
+            name = request.form.get('name')
+            lastname = request.form.get('lastname')
+            email = request.form.get('email')
+            current_password = request.form.get('current_password')
+            new_password = request.form.get('new_password')
+
+            if check_password_hash(user_data['password_hash'], current_password):
+                update_data = {
+                    "name": name,
+                    "lastname": lastname,
+                    "email": email,
+                }
+
+                if new_password:
+                    update_data["password_hash"] = generate_password_hash(new_password)
+
+                db.users.update_one({"_id": ObjectId(user_id)}, {"$set": update_data})
+                flash("Profile updated successfully!")
+            else:
+                flash("Current password is incorrect. Please try again.")
+
+        elif 'cancel_booking' in request.form:
+            # Cancelar la reserva
+            reservation_id = request.form.get('reservation_id')
+            db.reservations.delete_one({"_id": ObjectId(reservation_id)})
+            flash("Booking cancelled successfully!")
+            reservations = list(db.reservations.find({'user_id': user_id}))
+        # Convertir los IDs de las fotos en ObjectId
+
+ 
+
+    return render_template('user_profile.html', user_data=user_data, reservations=reservations)
 
 @app.route('/user_booking')
 def user_booking():

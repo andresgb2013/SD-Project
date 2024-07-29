@@ -38,7 +38,7 @@
                 <div class="col-md-12">
                     {% if current_user.is_authenticated %}
                     <strong>Price per night:</strong> {{ hotel.price_per_night }}
-                    <strong>Total Price:</strong> {{ booking_details.total_price }}
+                    <strong>Total Price:</strong> {{ booking_details.hotel_price }}
                     {% else %}
                     <strong>Login to see the price</strong>
                     {% endif %}

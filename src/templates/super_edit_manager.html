@@ -6,8 +6,6 @@
 <div class="container my-5">
     <h2 class="text-center mb-4">Edit Manager</h2>
 
-    <!-- Depuración: Mostrar el ID del manager -->
-    <p>Manager ID: {{ manager._id }}</p>
 
     <form action="{{ url_for('super_edit_manager', manager_id=manager._id) }}" method="POST">
         <div class="mb-3">

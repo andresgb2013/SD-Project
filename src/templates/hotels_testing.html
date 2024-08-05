@@ -8,7 +8,6 @@
         width: 80%;
         margin: auto;
         padding: 20px;
-        text-align: center;
     }
     .hotel-card {
         border: 1px solid #ddd;
@@ -18,13 +17,12 @@
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .hotel-details {
-        text-align: left;
+        margin-bottom: 20px;
     }
     .hotel-photos {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        display: flex;
+        flex-wrap: wrap;
         gap: 10px;
-        margin-top: 10px;
     }
     .hotel-photos img {
         width: 100%;
@@ -32,8 +30,18 @@
         border-radius: 5px;
         object-fit: cover;
     }
-    .hotel-photos img:nth-child(odd) {
-        grid-column: span 2;
+    .main-photo {
+        flex: 1 1 100%;
+        margin-bottom: 20px;
+    }
+    .room-photos {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .room-photo {
+        flex: 1 1 calc(33.333% - 10px);
+        margin-bottom: 10px;
     }
 </style>
 
@@ -47,12 +55,22 @@
             <p><strong>Address:</strong> {{ hotel.address.street1 }}, {{ hotel.address.city }}, {{ hotel.address.country }}</p>
             <p><strong>Description:</strong> {{ hotel.description }}</p>
             <p><strong>Price per Night:</strong> ${{ hotel.price_per_night }}</p>
-            <p><strong>ID:</strong> ${{ hotel._id }}</p>
         </div>
         <div class="hotel-photos">
-            {% for photo_id in hotel.photos %}
-            <img src="{{ url_for('hotel_photo', photo_id=photo_id) }}" alt="Hotel Photo" class="hotel-photo">
-            {% endfor %}
+            {% if hotel.photos %}
+            <div class="main-photo">
+                <img src="{{ url_for('hotel_photo', photo_id=hotel.photos[0]) }}" alt="Hotel Main Photo">
+            </div>
+            <div class="room-photos">
+                {% for photo_id in hotel.photos[1:] %}
+                <div class="room-photo">
+                    <img src="{{ url_for('hotel_photo', photo_id=photo_id) }}" alt="Hotel Room Photo">
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p>No photos available.</p>
+            {% endif %}
         </div>
         <form method="POST" action="{{ url_for('hotel_info') }}">
             <input type="hidden" name="hotel_name" value="{{ hotel.title }}">
@@ -72,4 +90,3 @@
     {% endfor %}
 </div>
 {% endblock %}
-

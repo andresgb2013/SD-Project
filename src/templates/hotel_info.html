@@ -24,20 +24,37 @@
                     <strong>Extra Info:</strong> {{ hotel.extra_info }}
                 </div>
             </div>
+            
             <div class="row mb-4">
                 <div class="col-md-12">
                     <strong>Available Photos:</strong>
-                    <div class="hotel-photos">
-                        {% for photo_id in hotel.photos %}
-                        <img src="{{ url_for('hotel_photo', photo_id=photo_id) }}" alt="Hotel Photo" class="hotel-photo">
-                        {% endfor %}
+                    <div class="row">
+                        {% if hotel.photos %}
+                        <div class="col-md-12 mb-3">
+                            <img src="{{ url_for('hotel_photo', photo_id=hotel.photos[0]) }}" alt="Hotel Main Photo" class="img-fluid rounded">
+                            <p class="text-center mt-2"><strong>Main Photo</strong></p>
+                        </div>
+                        <div class="col-md-12">
+                            <strong>Room Photos:</strong>
+                            <div class="row">
+                                {% for photo_id in hotel.photos[1:] %}
+                                <div class="col-md-4 mb-3">
+                                    <img src="{{ url_for('hotel_photo', photo_id=photo_id) }}" alt="Hotel Room Photo" class="img-fluid rounded">
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% else %}
+                        <p>No photos available.</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
+            
             <div class="row mb-4">
                 <div class="col-md-12">
                     {% if current_user.is_authenticated %}
-                    <strong>Price per night:</strong> {{ hotel.price_per_night }}
+                    <strong>Price per night:</strong> {{ hotel.price_per_night }}<br>
                     <strong>Total Price:</strong> {{ booking_details.hotel_price }}
                     {% else %}
                     <strong>Login to see the price</strong>
@@ -83,6 +100,19 @@
                     <button type="submit" class="btn btn-success mt-3">Proceed to Confirmation</button>
                 </div>
             </form>
+
+            <form action="{{ url_for('booking') }}" method="POST">
+                <div class="col-12 text-center">
+                    <input type="hidden" name="destination" value="{{ booking_details.destination }}">
+                    <input type="hidden" name="check_in" value="{{ booking_details.check_in }}">
+                    <input type="hidden" name="check_out" value="{{ booking_details.check_out }}">
+                    <input type="hidden" name="guests" value="{{ booking_details.guests }}">
+                    <input type="hidden" name="rooms" value="{{ booking_details.rooms }}">
+                    <button class="btn btn-secondary mt-3" id="backToBookingBtn">Back to booking</button>
+                </div>
+            </form>
+
+
         </div>
     </div>
 

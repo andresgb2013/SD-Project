@@ -114,10 +114,11 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
-#Rutas de la Aplicación
-@app.route('/')
+@app.route('/', methods=['GET'])
 def home():
-    return render_template('home.html')
+    cities = list(cities_collection.find())
+    return render_template('home.html', cities=cities)
+
 
 @app.route('/user_profile', methods=['GET', 'POST'])
 @login_required
@@ -179,6 +180,7 @@ def booking_cancel():
 @app.route('/booking', methods=['GET', 'POST'])
 def booking():
     if request.method == 'POST':
+        cities = list(cities_collection.find())
         destination = request.form['destination']
         check_in = request.form['check_in']
         check_out = request.form['check_out']
@@ -195,7 +197,7 @@ def booking():
 
         session['booking_details'] = booking_details
         hotels = list(hotels_collection.find({'address.city': destination}))
-        return render_template('booking.html', booking_details=booking_details, hotels=hotels)
+        return render_template('booking.html', booking_details=booking_details, hotels=hotels,cities= cities)
 
     elif request.method == 'GET':
         destination = request.args.get('destination')

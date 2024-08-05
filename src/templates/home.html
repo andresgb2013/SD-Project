@@ -33,10 +33,9 @@
         <div class="col-md-3">
             <select class="form-select" name="destination" required>
                 <option value="">Select Destination</option>
-                <option value="Berlin">Berlin</option>
-                <option value="Munich">Munich</option>
-                <option value="Hamburg">Hamburg</option>
-                <option value="Frankfurt">Frankfurt</option>
+                {% for city in cities %}
+                <option value="{{ city.name }}">{{ city.name }}</option>
+                {% endfor %}
             </select>
         </div>
         <div class="col-md-2">
@@ -59,11 +58,10 @@
 <!-- Popular Destinations Section -->
 <section id="destinations" class="mt-5">
     <h2 class="h4 mb-3">Popular Destinations</h2>
-    <ul class="list-group" name="destination">
-        <li class="list-group-item"><a href="{{ url_for('booking', destination='Berlin') }}">Berlin</a></li>
-        <li class="list-group-item"><a href="{{ url_for('booking', destination='Munich') }}">Munich</a></li>
-        <li class="list-group-item"><a href="{{ url_for('booking', destination='Hamburg') }}">Hamburg</a></li>
-        <li class="list-group-item"><a href="{{ url_for('booking', destination='Frankfurt') }}">Frankfurt</a></li>
+    <ul class="list-group">
+        {% for city in cities %}
+            <li class="list-group-item"><a href="{{ url_for('booking', destination=city.name) }}">{{ city.name }}</a></li>
+        {% endfor %}
     </ul>
 </section>
 

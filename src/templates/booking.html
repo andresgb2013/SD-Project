@@ -12,23 +12,28 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="destination" class="form-label"><strong>Destination:</strong></label>
-                        <input type="text" id="destination" name="destination" class="form-control" value="{{ booking_details.destination }}">
+                        <select class="form-select" name="destination" required>
+                            <option value="">Select Destination</option>
+                            {% for city in cities %}
+                            <option value="{{ city.name }}">{{ city.name }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="check_in" class="form-label"><strong>Check-in:</strong></label>
-                        <input type="date" id="check_in" name="check_in" class="form-control" value="{{ booking_details.check_in }}">
+                        <input type="date" id="check_in" name="check_in" class="form-control" value="{{ booking_details.check_in }}" required>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="check_out" class="form-label"><strong>Check-out:</strong></label>
-                        <input type="date" id="check_out" name="check_out" class="form-control" value="{{ booking_details.check_out }}">
+                        <input type="date" id="check_out" name="check_out" class="form-control" value="{{ booking_details.check_out }}" required>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="guests" class="form-label"><strong>Guests:</strong></label>
-                        <input type="number" id="guests" name="guests" class="form-control" value="{{ booking_details.guests }}">
+                        <input type="number" id="guests" name="guests" class="form-control" value="{{ booking_details.guests }}" min="1" required>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="rooms" class="form-label"><strong>Rooms:</strong></label>
-                        <input type="number" id="rooms" name="rooms" class="form-control" value="{{ booking_details.rooms }}">
+                        <input type="number" id="rooms" name="rooms" class="form-control" value="{{ booking_details.rooms }}" min="1" required>
                     </div>
                     <div class="col-12 text-center">
                         <button type="submit" class="btn btn-primary mt-3">Update Booking</button>
@@ -53,7 +58,6 @@
                         <h5 class="card-title">{{ hotel.title }}</h5>
                         <p class="card-text"><strong>City:</strong> {{ hotel.address.city }}</p>
                         <p class="card-text"><strong>Country:</strong> {{ hotel.address.country }}</p>
-                        <p class="card-text"><strong>ID:</strong> {{ hotel._id }}</p>
 
                         <div class="mb-2">
                             <p><strong>Description:</strong> <span class="description">{{ hotel.description }}</span></p>

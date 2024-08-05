@@ -1,86 +1,28 @@
 {% extends 'base.html' %}
 
-{% block title %}Super Add City - Travel Booking{% endblock %}
+{% block title %}Add City - Travel Booking{% endblock %}
 
 {% block content %}
-
-<style>
-    .city-container {
-        width: 50%;
-        margin: auto;
-        padding: 20px;
-        text-align: center;
-    }
-    .city-container .field-container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 10px auto;
-    }
-    .city-container input[type="text"] {
-        width: calc(80% - 20px);
-        padding: 10px;
-        margin-right: 10px;
-    }
-    .city-container .button {
-        margin: 10px;
-    }
-    .button {
-        display: inline-block;
-        background: #003580;
-        color: #fff;
-        padding: 10px 20px;
-        text-align: center;
-        cursor: pointer;
-        border: none;
-        margin: 5px 0;
-    }
-    .small-btn {
-        display: inline-block;
-        text-align: center;
-        padding: 5px 10px;
-        margin: 0;
-    }
-</style>
-
-<div class="row justify-content-center">
-    <div class="col-md-10">
-        <div class="card">
-            <div class="city-container">
-                <form action="/add_city" method="POST">
-                    <div class="field-container">
-                        <input type="text" id="name" name="name" placeholder="Name" required>
-                        <button class="btn btn-primary mx-2" type="button" onclick="editField('name')">Edit</button>
-                    </div>
-                    <div class="field-container">
-                        <input type="text" id="postal_code" name="postal_code" placeholder="Postal Code" required>
-                        <button class="btn btn-primary mx-2" type="button" onclick="editField('postal_code')">Edit</button>
-                    </div>
-                    <div class="field-container">
-                        <input type="text" id="country" name="country" placeholder="Country" required>
-                        <button class="btn btn-primary mx-2" type="button" onclick="editField('country')">Edit</button>
-                    </div>
-                    <button class="btn btn-primary mx-2" type="submit">Save</button>
-                    <button class="btn btn-danger mx-2" type="button" onclick="deleteCity()">Delete</button>
-                </form>
-            </div>
+<div class="container my-5">
+    <h2 class="text-center mb-4">Add City</h2>
+    <div class="card mb-4">
+        <div class="card-body">
+            <form action="{{ url_for('super_add_city') }}" method="POST">
+                <div class="mb-3">
+                    <label for="name" class="form-label">City Name</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="country" class="form-label">Country</label>
+                    <input type="text" class="form-control" id="country" name="country" required>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Add City</button>
+            </form>
         </div>
     </div>
 </div>
-<script>
-    function editField(fieldId) {
-        document.getElementById(fieldId).focus();
-    }
-
-    function saveCity() {
-        alert('City saved successfully!');
-        window.location.href = '/super_listing';
-    }
-
-    function deleteCity() {
-        alert('City deleted successfully!');
-        window.location.href = '/super_listing';
-    }
-</script>
-
 {% endblock %}

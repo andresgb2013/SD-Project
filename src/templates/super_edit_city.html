@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit City - Travel Booking{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="text-center mb-4">Edit City</h2>
+
+    <form action="{{ url_for('super_edit_city', city_id=city._id) }}" method="POST">
+        <div class="mb-3">
+            <label for="name" class="form-label">City Name</label>
+            <input type="text" class="form-control" id="name" name="name" value="{{ city.name }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="country" class="form-label">Country</label>
+            <input type="text" class="form-control" id="country" name="country" value="{{ city.country }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" name="description" rows="4" required>{{ city.description }}</textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Update City</button>
+        <button type="button" class="btn btn-secondary" onclick="window.location.href='/super_profile'">Cancel</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,31 +1,76 @@
 {% extends 'base.html' %}
 
-{% block title %}Manager Listing - Travel Booking{% endblock %}
+{% block title %}Hotel Listings - Travel Booking{% endblock %}
 
 {% block content %}
 <div class="container my-5">
     <h2 class="text-center mb-4">Hotel Listings</h2>
+    <div class="text-end mb-3">
+        <a href="{{ url_for('add_hotel') }}" class="btn btn-success">Add New Hotel</a>
+    </div>
     {% for city, hotels in hotels_by_city.items() %}
     <h3>{{ city }}</h3>
-    <div class="row">
+    <div class="row row-cols-1 row-cols-md-3 g-4">
         {% for hotel in hotels %}
-        <div class="col-md-4 mb-4">
+        <div class="col">
             <div class="card h-100">
                 {% if hotel.photos %}
-                <img src="{{ url_for('hotel_photo', photo_id=hotel.photos[0]) }}" class="card-img-top" alt="Hotel Photo">
+                <img src="{{ url_for('get_photo', photo_id=hotel.photos[0]) }}" class="card-img-top" alt="Hotel Photo">
                 {% endif %}
                 <div class="card-body">
                     <h5 class="card-title">{{ hotel.title }}</h5>
-                    <p class="card-text">{{ hotel.description }}</p>
-                    <button class="btn btn-primary" onclick="window.location.href='/manager_hotel_editing/{{ hotel._id }}'">Edit</button>
-                    <form action="{{ url_for('delete_hotel', hotel_id=hotel._id) }}" method="POST" class="d-inline">
-                        <button type="submit" class="btn btn-danger">Delete</button>
-                    </form>
+                    <p class="card-text">
+                        <span class="description-short">{{ hotel.description[:100] }}...</span>
+                        <span class="description-full d-none">{{ hotel.description }}</span>
+                        <a href="#" class="read-more">Read more</a>
+                        <a href="#" class="read-less d-none">Read less</a>
+                    </p>
+                    <div class="d-flex justify-content-between">
+                        <button class="btn btn-primary" onclick="window.location.href='/manager_hotel_editing/{{ hotel._id }}'">Edit</button>
+                        <form action="{{ url_for('delete_hotel', hotel_id=hotel._id) }}" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
     {% endfor %}
+    <button class="btn btn-secondary mt-3" onclick="window.location.href='/manager_profile'">Back to Profile</button>
+
 </div>
+{% endblock %}
+
+{% block additional_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var readMoreLinks = document.querySelectorAll('.read-more');
+        var readLessLinks = document.querySelectorAll('.read-less');
+
+        readMoreLinks.forEach(function (link) {
+            link.addEventListener('click', function (event) {
+                event.preventDefault();
+                var descriptionShort = this.previousElementSibling;
+                var descriptionFull = descriptionShort.nextElementSibling;
+                descriptionShort.classList.add('d-none');
+                descriptionFull.classList.remove('d-none');
+                this.classList.add('d-none');
+                this.nextElementSibling.classList.remove('d-none');
+            });
+        });
+
+        readLessLinks.forEach(function (link) {
+            link.addEventListener('click', function (event) {
+                event.preventDefault();
+                var descriptionFull = this.previousElementSibling;
+                var descriptionShort = descriptionFull.previousElementSibling;
+                descriptionFull.classList.add('d-none');
+                descriptionShort.classList.remove('d-none');
+                this.classList.add('d-none');
+                this.previousElementSibling.classList.remove('d-none');
+            });
+        });
+    });
+</script>
 {% endblock %}

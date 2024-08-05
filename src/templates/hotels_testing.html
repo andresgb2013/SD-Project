@@ -17,14 +17,23 @@
         padding: 20px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    .hotel-card img {
+    .hotel-details {
+        text-align: left;
+    }
+    .hotel-photos {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 10px;
+        margin-top: 10px;
+    }
+    .hotel-photos img {
         width: 100%;
         height: auto;
         border-radius: 5px;
-        margin: 10px 0;
+        object-fit: cover;
     }
-    .hotel-details {
-        text-align: left;
+    .hotel-photos img:nth-child(odd) {
+        grid-column: span 2;
     }
 </style>
 
@@ -39,11 +48,10 @@
             <p><strong>Description:</strong> {{ hotel.description }}</p>
             <p><strong>Price per Night:</strong> ${{ hotel.price_per_night }}</p>
             <p><strong>ID:</strong> ${{ hotel._id }}</p>
-
         </div>
         <div class="hotel-photos">
             {% for photo_id in hotel.photos %}
-            <img src="{{ url_for('hotel_photo', photo_id=photo_id) }}" alt="Hotel Photo">
+            <img src="{{ url_for('hotel_photo', photo_id=photo_id) }}" alt="Hotel Photo" class="hotel-photo">
             {% endfor %}
         </div>
         <form method="POST" action="{{ url_for('hotel_info') }}">
@@ -64,3 +72,4 @@
     {% endfor %}
 </div>
 {% endblock %}
+

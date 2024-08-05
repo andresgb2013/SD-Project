@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Manager - Travel Booking{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="text-center mb-4">Edit Manager</h2>
+
+    <!-- Depuración: Mostrar el ID del manager -->
+    <p>Manager ID: {{ manager._id }}</p>
+
+    <form action="{{ url_for('super_edit_manager', manager_id=manager._id) }}" method="POST">
+        <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="name" name="name" value="{{ manager.name }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="lastname" class="form-label">Last Name</label>
+            <input type="text" class="form-control" id="lastname" name="lastname" value="{{ manager.lastname }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email" value="{{ manager.email }}" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Update Manager</button>
+        <button type="button" class="btn btn-secondary" onclick="window.location.href='/super_manager'">Cancel</button>
+    </form>
+</div>
+{% endblock %}
+

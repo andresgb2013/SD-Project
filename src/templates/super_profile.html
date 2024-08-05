@@ -3,51 +3,39 @@
 {% block title %}Super User Profile - Travel Booking{% endblock %}
 
 {% block content %}
-
 <div class="container my-5">
-    <div class="row justify-content-center">
-        <div class="col-md-15">
-            <div class="card">
-                <div class="card-body text-center">
-                    <h3 class="card-title">Super User Profile</h3>
-                    <div class="profile-container">
-                        <div class="nav-buttons mb-3">
-                            <button class="btn btn-primary mx-2" onclick="window.location.href='/super_profile'">My Profile</button>
-                            <button class="btn btn-secondary mx-2" onclick="window.location.href='/super_listing'">Actions</button>
-                        </div>
-                        <form>
-                            <div class="mb-3 field-container d-flex justify-content-center align-items-center">
-                                <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
-                                <button class="btn btn-outline-primary small-btn mx-2" type="button" onclick="editField('username')">Edit</button>
-                            </div>
-                            <div class="mb-3 field-container d-flex justify-content-center align-items-center">
-                                <input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
-                                <button class="btn btn-outline-primary small-btn mx-2" type="button" onclick="editField('email')">Edit</button>
-                            </div>
-                            <div class="mb-3 field-container d-flex justify-content-center align-items-center">
-                                <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
-                                <button class="btn btn-outline-primary small-btn mx-2" type="button" onclick="editField('password')">Edit</button>
-                            </div>
-                        </form>
-                        <div class="logout mt-4">
-                            <button class="btn btn-primary mx-2" type="submit" onclick="saveProfile()">Save</button>
-                            <button class="btn btn-danger mx-2" onclick="window.location.href='/login'">Logout</button>
-                        </div>
-                    </div>
+    <h2 class="text-center mb-4">Super User Profile</h2>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4 class="card-title">Profile Information</h4>
+            <form action="{{ url_for('super_profile') }}" method="POST">
+                <input type="hidden" name="update_profile" value="1">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Full Name</label>
+                    <input type="text" class="form-control" id="name" name="name" value="{{ current_user.name }}" required>
                 </div>
-            </div>
+                <div class="mb-3">
+                    <label for="lastname" class="form-label">Last Name</label>
+                    <input type="text" class="form-control" id="lastname" name="lastname" value="{{ current_user.lastname }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ current_user.email }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="current_password" class="form-label">Current Password</label>
+                    <input type="password" class="form-control" id="current_password" name="current_password" required>
+                </div>
+                <div class="mb-3">
+                    <label for="new_password" class="form-label">New Password (leave blank to keep current password)</label>
+                    <input type="password" class="form-control" id="new_password" name="new_password">
+                </div>
+                <button type="submit" class="btn btn-primary">Update Profile</button>
+            </form>
+            <button class="btn btn-secondary mt-3" onclick="window.location.href='/super_listing'">My Cities</button>
+            <button class="btn btn-secondary mt-3" onclick="window.location.href='/super_manager'">My Managers</button>
         </div>
     </div>
 </div>
-<script>
-    function editField(fieldId) {
-        document.getElementById(fieldId).focus();
-    }
-
-    function saveProfile() {
-        alert('Profile saved successfully!');
-        window.location.href = '/super_profile';
-    }
-</script>
-
 {% endblock %}
+

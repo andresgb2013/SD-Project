@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}My Managers - Travel Booking{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="text-center mb-4">My Managers</h2>
+
+    <!-- Add New Manager Button -->
+    <div class="text-end mb-4">
+        <a href="{{ url_for('super_add_manager') }}" class="btn btn-success">Add New Manager</a>
+    </div>
+
+    <!-- Managers List -->
+    {% if managers %}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4 class="card-title">All Managers</h4>
+            <div class="list-group">
+                {% for manager in managers %}
+                <div class="list-group-item">
+                    <h5 class="mb-3">{{ manager.name }} {{ manager.lastname }}</h5>
+                    <p><strong>Email:</strong> {{ manager.email }}</p>
+                    
+                    <div class="d-flex justify-content-between mt-3">
+                        <!-- Edit Button -->
+                        <a href="{{ url_for('super_edit_manager', manager_id=manager._id) }}" class="btn btn-warning btn-sm">Edit</a>
+
+                        <!-- Delete Button -->
+                        <form action="{{ url_for('delete_manager', manager_id=manager._id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this manager?');">
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-warning text-center" role="alert">
+        No managers found.
+    </div>
+    {% endif %}
+
+    <!-- Back to Profile Button -->
+    <button class="btn btn-secondary mt-3" onclick="window.location.href='/super_profile'">Back to Profile</button>
+</div>
+{% endblock %}

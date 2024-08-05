@@ -1,97 +1,36 @@
-<!-- super_add_manager.html -->
 {% extends 'base.html' %}
 
-{% block title %}Super Add Manager - Travel Booking{% endblock %}
+{% block title %}Add Manager - Travel Booking{% endblock %}
 
 {% block content %}
-<head>
-    <style>
-        .manager-container {
-            width: 50%;
-            margin: auto;
-            padding: 20px;
-            text-align: center;
-        }
-        .manager-container .field-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 10px auto;
-        }
-        .manager-container input[type="text"], 
-        .manager-container input[type="password"], 
-        .manager-container input[type="email"] {
-            width: calc(80% - 20px);
-            padding: 10px;
-            margin-right: 10px;
-        }
-        .manager-container .button {
-            margin: 10px;
-        }
-        .button {
-            display: inline-block;
-            background: #003580;
-            color: #fff;
-            padding: 10px 20px;
-            text-align: center;
-            cursor: pointer;
-            border: none;
-            margin: 5px 0;
-        }
-        .small-btn {
-            display: inline-block;
-            text-align: center;
-            padding: 5px 10px;
-            margin: 0;
-        }
-    </style>
-</head>
-<div class="row justify-content-center">
-    <div class="col-md-10">
-        <div class="card">
-            <div class="manager-container">
-                <form action="{{ url_for('super_add_manager') }}" method="POST">
-                    <div class="field-container">
-                        <input type="text" id="name" name="name" placeholder="Name" required>
-                        <button class="btn btn-primary mx-2" type="button" onclick="editField('name')">Edit</button>
-                    </div>
-                    <div class="field-container">
-                        <input type="text" id="lastname" name="lastname" placeholder="Last name" required>
-                        <button class="btn btn-primary mx-2" type="button" onclick="editField('lastname')">Edit</button>
-                    </div>
-                    <div class="field-container">
-                        <input type="email" id="email" name="email" placeholder="Email" required>
-                        <button class="btn btn-primary mx-2" type="button" onclick="editField('email')">Edit</button>
-                    </div>
-                    <div class="field-container">
-                        <input type="password" id="password" name="password" placeholder="Password (min. 8 characters)" required>
-                        <button class="btn btn-primary mx-2" type="button" onclick="editField('password')">Edit</button>
-                    </div>
-                    <div class="field-container">
-                        <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm Password" required>
-                        <button class="btn btn-primary mx-2" type="button" onclick="editField('confirm_password')">Edit</button>
-                    </div>
-
-                    <button class="btn btn-primary mx-2" type="submit" onclick="saveManager()">Save Manager</button>
-                    <button class="btn btn-danger mx-2" type="button" onclick="deleteManager()">Delete</button>
-                </form>
-            </div>
+<div class="container my-5">
+    <h2 class="text-center mb-4">Add Manager</h2>
+    <div class="card mb-4">
+        <div class="card-body">
+            <form action="{{ url_for('super_add_manager') }}" method="POST">
+                <div class="mb-3">
+                    <label for="name" class="form-label">First Name</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="lastname" class="form-label">Last Name</label>
+                    <input type="text" class="form-control" id="lastname" name="lastname" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <div class="mb-3">
+                    <label for="confirm_password" class="form-label">Confirm Password</label>
+                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Manager</button>
+            </form>
         </div>
     </div>
 </div>
-<script>
-    function editField(fieldId) {
-        document.getElementById(fieldId).focus();
-    }
-
-    function saveManager() {
-        alert('Manager saved successfully!');
-        window.location.href = '/super_listing';
-    }
-
-    function deleteManager() {
-        alert('Manager deleted successfully!');
-        window.location.href = '/super_listing';
-    }
-</script>
 {% endblock %}

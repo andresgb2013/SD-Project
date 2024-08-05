@@ -14,7 +14,9 @@
                     {% if messages %}
                     <div class="alert alert-warning" role="alert">
                         {% for category, message in messages %}
+                        {% if category == 'login' %}
                         {{ message }}
+                        {% endif %}
                         {% endfor %}
                     </div>
                     {% endif %}
@@ -37,3 +39,4 @@
     </div>
 </div>
 {% endblock %}
+

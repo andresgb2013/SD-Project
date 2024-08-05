@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, request, flash, session, send_file
+from flask import Flask, render_template, redirect, url_for, request, flash, session, send_file, make_response
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -25,6 +25,8 @@ db = client['SD_Project']
 users_collection = db['users']
 hotels_collection = db['hotels']
 reservations_collection = db['reservations']
+cities_collection = db['cities']
+
 fs = gridfs.GridFS(db)
 
 
@@ -161,6 +163,7 @@ def user_profile():
     return render_template('user_profile.html', user_data=user_data, reservations=reservations)
 
 @app.route('/user_booking')
+@login_required
 def user_booking():
     if session.get('authenticated'):
         return redirect(url_for('login'))
@@ -206,9 +209,9 @@ def booking():
                 'guests': 1,
                 'rooms': 1
             }
-            session['booking_details'] = booking_details
-            hotels = list(hotels_collection.find({'address.city': destination}))
-            return render_template('hotels_testing.html', destination=destination, hotels=hotels, booking_details=booking_details)
+        session['booking_details'] = booking_details
+        hotels = list(hotels_collection.find({'address.city': destination}))
+        return render_template('hotels_testing.html', destination=destination, hotels=hotels, booking_details=booking_details)
 
     return redirect(url_for('home'))
 
@@ -288,14 +291,32 @@ def confirmation():
         flash('No booking details found. Please start your booking again.')
         return redirect(url_for('home'))
 
-    return render_template('confirmation.html', booking_details=booking_details)
+    hotel_id = booking_details.get('hotel_name')
+    if not hotel_id:
+        flash('No hotel ID found in booking details. Please start your booking again.')
+        return redirect(url_for('home'))
+
+    try:
+        hotel_name = hotel_id
+    except (ValueError, Exception) as e:
+        flash('Invalid hotel ID format. Please start your booking again.')
+        return redirect(url_for('home'))
+
+    hotel = hotels_collection.find_one({'title': hotel_name})
+    if not hotel:
+        flash('Hotel not found. Please start your booking again.')
+        return redirect(url_for('home'))
+
+    return render_template('confirmation.html', booking_details=booking_details, hotel=hotel)
+
 
 @app.route('/confirm_booking', methods=['POST'])
+#@login_required
 def confirm_booking():
     booking_details = session.get('booking_details', {})
     if not booking_details:
         flash('No booking details found. Please start your booking again.')
-        return redirect(url_for('home'))
+        return redirect(url_for('login'))
 
     user_id = current_user.get_id()
 
@@ -392,6 +413,29 @@ def manager_hotel_editing(hotel_id):
             'price_per_night': price_per_night
         }
 
+        # Eliminar fotos seleccionadas
+        if 'delete_photo' in request.form:
+            photo_id_to_delete = request.form['delete_photo']
+            db.hotels.update_one({"_id": ObjectId(hotel_id)}, {"$pull": {"photos": ObjectId(photo_id_to_delete)}})
+            fs.delete(ObjectId(photo_id_to_delete))
+            flash('Photo deleted successfully!')
+            return redirect(url_for('manager_hotel_editing', hotel_id=hotel_id))
+
+        # Manejo de nuevas fotos
+        photos = request.files.getlist('photos')
+        photo_ids = []
+        
+        if photos:
+            for photo in photos:
+                if photo.filename == '':
+                    continue
+                filename = secure_filename(photo.filename)
+                file_id = fs.put(photo, filename=filename)
+                photo_ids.append(file_id)
+        
+        if photo_ids:
+            db.hotels.update_one({"_id": ObjectId(hotel_id)}, {"$push": {"photos": {"$each": photo_ids}}})
+        
         db.hotels.update_one({"_id": ObjectId(hotel_id)}, {"$set": update_data})
         flash('Hotel updated successfully!')
         return redirect(url_for('manager_listing'))
@@ -461,36 +505,60 @@ def delete_reservation(reservation_id):
 @login_required
 def super_profile():
     if current_user.auth_level != 'super_user':
-        flash("Access Denied: You don't have the necessary permissions.", 'danger')
+        flash("Access Denied: You don't have the necessary permissions.", 'danger', category='login')
         return redirect(url_for('login'))
-
     return render_template('super_profile.html')
 
 @app.route('/super_listing')
 @login_required
 def super_listing():
     if current_user.auth_level != 'super_user':
-        flash("Access Denied: You don't have the necessary permissions.", 'danger')
+        flash("Access Denied: You don't have the necessary permissions.", 'danger', category='login')
         return redirect(url_for('login'))
 
-    managers = [{'name': 'John Doe', 'details': 'Manager of City A'}]
-    cities = [{'name': 'City A', 'details': 'Details of City A'}]
-    return render_template('super_listing.html', managers=managers, cities=cities)
+    cities = list(cities_collection.find())
+    return render_template('super_listing.html', cities=cities)
 
-@app.route('/super_add_city')
+@app.route('/super_manager')
+@login_required
+def super_manager():
+    if current_user.auth_level != 'super_user':
+        flash("Access Denied: You don't have the necessary permissions.", 'danger', category='login')
+        return redirect(url_for('login'))
+
+    managers = list(users_collection.find({'auth_level': 'manager_user'}))
+    return render_template('super_manager.html', managers=managers)
+
+@app.route('/super_add_city', methods=['GET', 'POST'])
 @login_required
 def super_add_city():
     if current_user.auth_level != 'super_user':
-        flash("Access Denied: You don't have the necessary permissions.", 'danger')
+        flash("Access Denied: You don't have the necessary permissions.", 'danger', category='login')
         return redirect(url_for('home'))
+    
+    if request.method == 'POST':
+        name = request.form['name']
+        country = request.form['country']
+        description= request.form['description']
 
+        city_data = {
+            'name': name,
+            'country': country,
+            'description': description
+
+        }
+        
+        cities_collection.insert_one(city_data)
+        flash('City added successfully', 'success')
+        return redirect(url_for('super_listing'))
+    
     return render_template('super_add_city.html')
 
 @app.route('/super_add_manager', methods=['GET', 'POST'])
 @login_required
 def super_add_manager():
     if current_user.auth_level != 'super_user':
-        flash("Access Denied: You don't have the necessary permissions.", 'danger')
+        flash("Access Denied: You don't have the necessary permissions.", 'danger', category='login')
         return redirect(url_for('login'))
     
     if request.method == 'POST':
@@ -517,9 +585,76 @@ def super_add_manager():
             }
             users_collection.insert_one(user_data)
             flash('Manager added successfully', 'success')
-            return redirect(url_for('super_listing'))
+            return redirect(url_for('super_manager'))
     
     return render_template('super_add_manager.html')
+
+@app.route('/super_edit_manager/<manager_id>', methods=['GET', 'POST'])
+@login_required
+def super_edit_manager(manager_id):
+    manager = db.users.find_one({'_id': ObjectId(manager_id)})
+    if request.method == 'POST':
+        name = request.form['name']
+        lastname = request.form['lastname']
+        email = request.form['email']
+        db.users.update_one({'_id': ObjectId(manager_id)}, {'$set': {
+            'name': name,
+            'lastname': lastname,
+            'email': email
+        }})
+        flash('Manager updated successfully')
+        return redirect(url_for('super_manager'))
+    return render_template('super_edit_manager.html', manager=manager)
+
+
+@app.route('/super_edit_city/<city_id>', methods=['GET', 'POST'])
+@login_required
+def super_edit_city(city_id):
+    if current_user.auth_level != 'super_user':
+        flash("Access Denied: You don't have the necessary permissions.", 'danger')
+        return redirect(url_for('login'))
+    
+    city = cities_collection.find_one({"_id": ObjectId(city_id)})
+    
+    if request.method == 'POST':
+        name = request.form['name']
+        country = request.form['country']
+        description = request.form['description']
+
+        update_data = {
+            'name': name,
+            'country': country,
+            'description': description
+        }
+        
+        cities_collection.update_one({"_id": ObjectId(city_id)}, {"$set": update_data})
+        flash('City updated successfully', 'success')
+        return redirect(url_for('super_listing'))
+    
+    return render_template('super_edit_city.html', city=city)
+
+@app.route('/delete_manager/<manager_id>', methods=['POST'])
+@login_required
+def delete_manager(manager_id):
+    if current_user.auth_level != 'super_user':
+        flash("Access Denied: You don't have the necessary permissions.", 'danger', category='login')
+        return redirect(url_for('login'))
+    
+    users_collection.delete_one({"_id": ObjectId(manager_id)})
+    flash('Manager deleted successfully', 'success')
+    return redirect(url_for('super_manager'))
+
+# Route to delete city
+@app.route('/delete_city/<city_id>', methods=['POST'])
+@login_required
+def delete_city(city_id):
+    if current_user.auth_level != 'super_user':
+        flash("Access Denied: You don't have the necessary permissions.", 'danger', category='login')
+        return redirect(url_for('login'))
+    
+    cities_collection.delete_one({"_id": ObjectId(city_id)})
+    flash('City deleted successfully', 'success')
+    return redirect(url_for('super_listing'))
 
 # Rutas de Gestión de Hoteles
 @app.route('/create_hotel', methods=['GET', 'POST'])
@@ -573,6 +708,7 @@ def create_hotel():
     return render_template('create_hotel.html')
 
 @app.route('/add_hotel', methods=['GET', 'POST'])
+@login_required
 def add_hotel():
     if request.method == 'POST':
         title = request.form['title']
@@ -636,6 +772,17 @@ def hotels():
 def hotel_photo(photo_id):
     photo = fs.get(ObjectId(photo_id))
     return send_file(photo, mimetype='image/jpeg')
+
+
+@app.route('/get_photo/<photo_id>')
+def get_photo(photo_id):
+    try:
+        photo = fs.get(ObjectId(photo_id))
+        response = make_response(photo.read())
+        response.mimetype = 'image/jpeg'
+        return response
+    except:
+        return '', 404
 
 
 #Ejecución de la Aplicación

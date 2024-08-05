@@ -5,9 +5,8 @@ from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 import os
 import pymongo
-from bson.objectid import ObjectId, InvalidId
+from bson.objectid import ObjectId
 import gridfs
-from bson.errors import InvalidId
 
 
 
@@ -287,6 +286,7 @@ def hotel_info():
 
 
 @app.route('/confirmation')
+@login_required
 def confirmation():
     booking_details = session.get('booking_details', {})
     if not booking_details:
@@ -313,7 +313,7 @@ def confirmation():
 
 
 @app.route('/confirm_booking', methods=['POST'])
-#@login_required
+@login_required
 def confirm_booking():
     booking_details = session.get('booking_details', {})
     if not booking_details:
@@ -388,11 +388,15 @@ def manager_listing():
 @app.route('/manager_hotel_editing/<hotel_id>', methods=['GET', 'POST'])
 @login_required
 def manager_hotel_editing(hotel_id):
+    hotel = db.hotels.find_one({"_id": ObjectId(hotel_id)})
+    cities = list(db.cities.find())
+
     if request.method == 'POST':
         title = request.form['title']
         street1 = request.form['street1']
         street2 = request.form.get('street2', '')
         street3 = request.form.get('street3', '')
+        postal_code = request.form['postal_code']
         city = request.form['city']
         country = request.form['country']
         description = request.form['description']
@@ -406,6 +410,7 @@ def manager_hotel_editing(hotel_id):
                 'street1': street1,
                 'street2': street2,
                 'street3': street3,
+                'postal_code': postal_code,
                 'city': city,
                 'country': country
             },
@@ -442,8 +447,8 @@ def manager_hotel_editing(hotel_id):
         flash('Hotel updated successfully!')
         return redirect(url_for('manager_listing'))
 
-    hotel = db.hotels.find_one({"_id": ObjectId(hotel_id)})
-    return render_template('hotel_editing.html', hotel=hotel)
+    return render_template('hotel_editing.html', hotel=hotel, cities=cities)
+
 
 @app.route('/delete_hotel/<hotel_id>', methods=['POST'])
 @login_required
@@ -659,59 +664,12 @@ def delete_city(city_id):
     return redirect(url_for('super_listing'))
 
 # Rutas de Gestión de Hoteles
-@app.route('/create_hotel', methods=['GET', 'POST'])
-@login_required
-def create_hotel():
-    if current_user.auth_level != 'manager_user':
-        flash("Access Denied: You don't have the necessary permissions.", 'danger')
-        return redirect(url_for('home'))
-    
-    if request.method == 'POST':
-        title = request.form['title']
-        street1 = request.form['street1']
-        street2 = request.form['street2']
-        street3 = request.form['street3']
-        postal_code = request.form['postal_code']
-        city = request.form['city']
-        country = request.form['country']
-        description = request.form['description']
-        extra_info = request.form['extra_info']
-        no_of_guests = int(request.form['no_of_guests'])
-        price_per_night = float(request.form['price_per_night'])
-
-        photos = request.files.getlist('photos')
-        photo_urls = []
-        for photo in photos:
-            filename = secure_filename(photo.filename)
-            photo.save(os.path.join(app.config['uploads'], filename))
-            photo_urls.append(filename)
-
-        hotel_data = {
-            'title': title,
-            'address': {
-                'street1': street1,
-                'street2': street2,
-                'street3': street3,
-                'postal_code': postal_code,
-                'city': city,
-                'country': country
-            },
-            'description': description,
-            'extra_info': extra_info,
-            'no_of_guests': no_of_guests,
-            'price_per_night': price_per_night,
-            'photos': photo_urls
-        }
-
-        hotels_collection.insert_one(hotel_data)
-        flash('Hotel created successfully!')
-        return redirect(url_for('manager_listing'))
-
-    return render_template('create_hotel.html')
 
 @app.route('/add_hotel', methods=['GET', 'POST'])
 @login_required
 def add_hotel():
+    cities = list(db.cities.find())
+    
     if request.method == 'POST':
         title = request.form['title']
         street1 = request.form['street1']
@@ -754,9 +712,11 @@ def add_hotel():
 
         db.hotels.insert_one(hotel_data)
         flash('Hotel added successfully!')
-        return redirect(url_for('home'))
+        return redirect(url_for('manager_profile'))
 
-    return render_template('add_hotel.html')
+    return render_template('add_hotel.html', cities=cities)
+
+
 
 @app.route('/hotels')
 def hotels():

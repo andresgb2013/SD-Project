@@ -27,8 +27,17 @@
                     <input type="text" class="form-control" id="street3" name="street3" value="{{ hotel.address.street3 }}">
                 </div>
                 <div class="mb-3">
+                    <label for="postal_code" class="form-label">Postal Code</label>
+                    <input type="text" class="form-control" id="postal_code" name="postal_code" value="{{ hotel.address.postal_code }}" required>
+                </div>
+                <div class="mb-3">
                     <label for="city" class="form-label">City</label>
-                    <input type="text" class="form-control" id="city" name="city" value="{{ hotel.address.city }}" required>
+                    <select class="form-select" id="city" name="city" required>
+                        <option value="">Select City</option>
+                        {% for city in cities %}
+                        <option value="{{ city.name }}" {% if city.name == hotel.address.city %}selected{% endif %}>{{ city.name }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <div class="mb-3">
                     <label for="country" class="form-label">Country</label>

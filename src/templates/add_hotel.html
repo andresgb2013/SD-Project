@@ -2,95 +2,70 @@
 
 {% block title %}Add Hotel - Travel Booking{% endblock %}
 
-{% block additional_css %}
-<style>
-    .editing-container {
-        width: 60%;
-        margin: auto;
-        padding: 20px;
-        text-align: center;
-    }
-    .editing-container .field-container {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin: 10px auto;
-    }
-    .editing-container input[type="text"],
-    .editing-container input[type="email"],
-    .editing-container input[type="password"],
-    .editing-container textarea,
-    .editing-container input[type="number"],
-    .editing-container input[type="file"] {
-        width: calc(80% - 20px);
-        padding: 10px;
-        margin-right: 10px;
-    }
-    .button {
-        display: inline-block;
-        background: #e8491d;
-        color: #fff;
-        padding: 10px 20px;
-        text-align: center;
-        cursor: pointer;
-        border: none;
-        margin: 5px 0;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-10">
-        <div class="card">
-            <div class="editing-container">
-                <form action="{{ url_for('add_hotel') }}" method="POST" enctype="multipart/form-data">
-                    <div class="field-container">
-                        <label>Title:</label>
-                        <input type="text" name="title" id="hotel-title" class="form-control" required>
-                    </div>
-                    <div class="field-container">
-                        <label>Street 1:</label>
-                        <input type="text" name="street1" id="street1" class="form-control" required>
-                        <label>Street 2:</label>
-                        <input type="text" name="street2" id="street2" class="form-control">
-                    </div>
-                    <div class="field-container">
-                        <label>Street 3:</label>
-                        <input type="text" name="street3" id="street3" class="form-control">
-                        <label>Postal Code:</label>
-                        <input type="text" name="postal_code" id="postal_code" class="form-control" required>
-                    </div>
-                    <div class="field-container">
-                        <label>City:</label>
-                        <input type="text" name="city" id="city" class="form-control" required>
-                        <label>Country:</label>
-                        <input type="text" name="country" id="country" class="form-control" required>
-                    </div>
-                    <div class="field-container">
-                        <label>Photos:</label>
-                        <input type="file" name="photos" id="photo-upload" multiple accept="image/*" class="form-control">
-                    </div>
-                    <div class="field-container">
-                        <label>Description:</label>
-                        <textarea name="description" id="description" class="form-control" required></textarea>
-                    </div>
-                    <div class="field-container">
-                        <label>Extra Info:</label>
-                        <textarea name="extra_info" id="extra-info" class="form-control"></textarea>
-                    </div>
-                    <div class="field-container">
-                        <label>No. of Guests:</label>
-                        <input type="number" name="no_of_guests" id="no-of-guests" class="form-control" required>
-                        <label>Price / Night:</label>
-                        <input type="number" name="price_per_night" id="price-per-night" class="form-control" required>
-                    </div>
-                    <button class="btn btn-primary" type="submit">Save</button>
-                </form>
-            </div>
+<div class="container my-5">
+    <h2 class="text-center mb-4">Add Hotel</h2>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4 class="card-title">Hotel Information</h4>
+            <form action="{{ url_for('add_hotel') }}" method="POST" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="title" class="form-label">Hotel Title</label>
+                    <input type="text" class="form-control" id="title" name="title" required>
+                </div>
+                <div class="mb-3">
+                    <label for="street1" class="form-label">Street Address 1</label>
+                    <input type="text" class="form-control" id="street1" name="street1" required>
+                </div>
+                <div class="mb-3">
+                    <label for="street2" class="form-label">Street Address 2</label>
+                    <input type="text" class="form-control" id="street2" name="street2">
+                </div>
+                <div class="mb-3">
+                    <label for="street3" class="form-label">Street Address 3</label>
+                    <input type="text" class="form-control" id="street3" name="street3">
+                </div>
+                <div class="mb-3">
+                    <label for="postal_code" class="form-label">Postal Code</label>
+                    <input type="text" class="form-control" id="postal_code" name="postal_code" required>
+                </div>
+                <div class="mb-3">
+                    <label for="city" class="form-label">City</label>
+                    <select class="form-select" id="city" name="city" required>
+                        <option value="">Select City</option>
+                        {% for city in cities %}
+                        <option value="{{ city.name }}">{{ city.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="country" class="form-label">Country</label>
+                    <input type="text" class="form-control" id="country" name="country" required>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="extra_info" class="form-label">Extra Info</label>
+                    <textarea class="form-control" id="extra_info" name="extra_info" rows="3"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="no_of_guests" class="form-label">Number of Guests</label>
+                    <input type="number" class="form-control" id="no_of_guests" name="no_of_guests" required>
+                </div>
+                <div class="mb-3">
+                    <label for="price_per_night" class="form-label">Price per Night</label>
+                    <input type="number" step="0.01" class="form-control" id="price_per_night" name="price_per_night" required>
+                </div>
+                <div class="mb-3">
+                    <label for="photos" class="form-label">Add Photos</label>
+                    <input type="file" class="form-control" id="photos" name="photos" accept="image/*" multiple>
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </form>
         </div>
     </div>
 </div>
-
-
 {% endblock %}

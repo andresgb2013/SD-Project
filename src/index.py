@@ -29,6 +29,26 @@ cities_collection = db['cities']
 fs = gridfs.GridFS(db)
 
 
+from functools import wraps
+from flask import abort
+
+def role_required(role):
+    def wrapper(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not current_user.is_authenticated:
+                return redirect(url_for('login'))
+            if current_user.auth_level != role:
+                abort(403)
+            return f(*args, **kwargs)
+        return decorated_function
+    return wrapper
+
+@app.errorhandler(403)
+def forbidden(e):
+    return render_template('403.html'), 403
+
+
 class User(UserMixin):
     def __init__(self, user_id, name, lastname, email, password_hash, auth_level):
         self.id = user_id
@@ -62,7 +82,7 @@ def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        
+
         user_doc = users_collection.find_one({'email': email})
         if user_doc and check_password_hash(user_doc['password_hash'], password):
             user = User.from_mongo(user_doc)
@@ -75,8 +95,9 @@ def login():
             else:
                 return redirect(url_for('home'))
         else:
-            flash('Invalid credentials')
+            flash('Invalid email or password', 'error')
     return render_template('login.html')
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -342,6 +363,7 @@ def confirm_booking():
 #Rutas de Gestión de Usuarios
 @app.route('/manager_profile', methods=['GET', 'POST'])
 @login_required
+@role_required('manager_user')
 def manager_profile():
     user_id = current_user.get_id()
     user_data = db.users.find_one({"_id": ObjectId(user_id)})
@@ -374,6 +396,7 @@ def manager_profile():
 
 @app.route('/manager_listing')
 @login_required
+@role_required('manager_user')
 def manager_listing():
     hotels = db.hotels.find()
     hotels_by_city = {}
@@ -387,6 +410,7 @@ def manager_listing():
 
 @app.route('/manager_hotel_editing/<hotel_id>', methods=['GET', 'POST'])
 @login_required
+@role_required('manager_user')
 def manager_hotel_editing(hotel_id):
     hotel = db.hotels.find_one({"_id": ObjectId(hotel_id)})
     cities = list(db.cities.find())
@@ -452,6 +476,7 @@ def manager_hotel_editing(hotel_id):
 
 @app.route('/delete_hotel/<hotel_id>', methods=['POST'])
 @login_required
+@role_required('manager_user')
 def delete_hotel(hotel_id):
     db.hotels.delete_one({"_id": ObjectId(hotel_id)})
     flash('Hotel deleted successfully!')
@@ -459,6 +484,7 @@ def delete_hotel(hotel_id):
 
 @app.route('/manager_bookings')
 @login_required
+@role_required('manager_user')
 def manager_bookings():
     # Obtener todas las reservas
     reservations = list(db.reservations.find())
@@ -474,6 +500,7 @@ def manager_bookings():
 
 @app.route('/edit_reservation/<reservation_id>', methods=['GET', 'POST'])
 @login_required
+@role_required('manager_user')
 def edit_reservation(reservation_id):
     reservation = db.reservations.find_one({"_id": ObjectId(reservation_id)})
 
@@ -502,6 +529,7 @@ def edit_reservation(reservation_id):
 
 @app.route('/delete_reservation/<reservation_id>', methods=['POST'])
 @login_required
+@role_required('manager_user')
 def delete_reservation(reservation_id):
     db.reservations.delete_one({"_id": ObjectId(reservation_id)})
     flash('Reservation deleted successfully!')
@@ -510,6 +538,7 @@ def delete_reservation(reservation_id):
 
 @app.route('/super_profile')
 @login_required
+@role_required('super_user')
 def super_profile():
     if current_user.auth_level != 'super_user':
         flash("Access Denied: You don't have the necessary permissions.", 'danger', category='login')
@@ -518,6 +547,7 @@ def super_profile():
 
 @app.route('/super_listing')
 @login_required
+@role_required('super_user')
 def super_listing():
     if current_user.auth_level != 'super_user':
         flash("Access Denied: You don't have the necessary permissions.", 'danger', category='login')
@@ -528,6 +558,7 @@ def super_listing():
 
 @app.route('/super_manager')
 @login_required
+@role_required('super_user')
 def super_manager():
     if current_user.auth_level != 'super_user':
         flash("Access Denied: You don't have the necessary permissions.", 'danger', category='login')
@@ -538,6 +569,7 @@ def super_manager():
 
 @app.route('/super_add_city', methods=['GET', 'POST'])
 @login_required
+@role_required('super_user')
 def super_add_city():
     if current_user.auth_level != 'super_user':
         flash("Access Denied: You don't have the necessary permissions.", 'danger', category='login')
@@ -563,6 +595,7 @@ def super_add_city():
 
 @app.route('/super_add_manager', methods=['GET', 'POST'])
 @login_required
+@role_required('super_user')
 def super_add_manager():
     if current_user.auth_level != 'super_user':
         flash("Access Denied: You don't have the necessary permissions.", 'danger', category='login')
@@ -598,6 +631,7 @@ def super_add_manager():
 
 @app.route('/super_edit_manager/<manager_id>', methods=['GET', 'POST'])
 @login_required
+@role_required('super_user')
 def super_edit_manager(manager_id):
     manager = db.users.find_one({'_id': ObjectId(manager_id)})
     if request.method == 'POST':
@@ -616,6 +650,7 @@ def super_edit_manager(manager_id):
 
 @app.route('/super_edit_city/<city_id>', methods=['GET', 'POST'])
 @login_required
+@role_required('super_user')
 def super_edit_city(city_id):
     if current_user.auth_level != 'super_user':
         flash("Access Denied: You don't have the necessary permissions.", 'danger')
@@ -642,6 +677,7 @@ def super_edit_city(city_id):
 
 @app.route('/delete_manager/<manager_id>', methods=['POST'])
 @login_required
+@role_required('super_user')
 def delete_manager(manager_id):
     if current_user.auth_level != 'super_user':
         flash("Access Denied: You don't have the necessary permissions.", 'danger', category='login')
@@ -654,6 +690,7 @@ def delete_manager(manager_id):
 # Route to delete city
 @app.route('/delete_city/<city_id>', methods=['POST'])
 @login_required
+@role_required('super_user')
 def delete_city(city_id):
     if current_user.auth_level != 'super_user':
         flash("Access Denied: You don't have the necessary permissions.", 'danger', category='login')
@@ -667,6 +704,7 @@ def delete_city(city_id):
 
 @app.route('/add_hotel', methods=['GET', 'POST'])
 @login_required
+@role_required('manager_user')
 def add_hotel():
     cities = list(db.cities.find())
     

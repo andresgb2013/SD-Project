@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}Access Forbidden{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <h1 class="display-4">403</h1>
+            <p class="lead">Access Forbidden</p>
+            <p>You do not have permission to access this page.</p>
+            <a href="{{ url_for('home') }}" class="btn btn-primary">Go to Homepage</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

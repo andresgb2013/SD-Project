@@ -7,12 +7,14 @@ import os
 import pymongo
 from bson.objectid import ObjectId
 import gridfs
+from middleware import LastURLMiddleware
+
 
 
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'your_secret_key')
-
+app.wsgi_app = LastURLMiddleware(app.wsgi_app)
 # Configuración de Flask-Login
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -31,6 +33,8 @@ fs = gridfs.GridFS(db)
 
 from functools import wraps
 from flask import abort
+
+
 
 def role_required(role):
     def wrapper(f):

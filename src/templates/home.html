@@ -39,10 +39,10 @@
             </select>
         </div>
         <div class="col-md-2">
-            <input type="date" class="form-control" id="check-in" name="check_in" placeholder="Check-in" required>
+            <input type="text" class="form-control" id="check-in" name="check_in" placeholder="Check-in" required>
         </div>
         <div class="col-md-2">
-            <input type="date" class="form-control" id="check-out" name="check_out" placeholder="Check-out" required>
+            <input type="text" class="form-control" id="check-out" name="check_out" placeholder="Check-out" required>
         </div>
         <div class="col-md-1">
             <input type="number" class="form-control" name="guests" placeholder="Guests" min="1" required>
@@ -50,7 +50,7 @@
         <div class="col-md-1">
             <input type="number" class="form-control" name="rooms" placeholder="Rooms" min="1" required>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-1">
             <input type="submit" class="btn btn-primary w-100" value="Search">
         </div>
     </form>
@@ -64,7 +64,6 @@
         {% endfor %}
     </ul>
 </section>
-
 {% endblock %}
 
 {% block additional_js %}
@@ -86,9 +85,9 @@
                 }),
             to = $("#check-out").datepicker({
                 defaultDate: "+1w",
-                    changeMonth: true,
-                    numberOfMonths: 1,
-                    dateFormat: dateFormat
+                changeMonth: true,
+                numberOfMonths: 1,
+                dateFormat: dateFormat
             })
                 .on("change", function () {
                     from.datepicker("option", "maxDate", getDate(this));

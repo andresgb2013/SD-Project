@@ -3,6 +3,42 @@
 {% block title %}Hotel Info - Trip Booking{% endblock %}
 
 {% block content %}
+<style>
+    .btn-update-booking {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        cursor: pointer;
+    }
+    .btn-update-booking:hover {
+        background-color: #218838;
+    }
+    .btn-proceed-confirmation {
+        background-color: #17a2b8;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        cursor: pointer;
+    }
+    .btn-proceed-confirmation:hover {
+        background-color: #138496;
+    }
+    .btn-back-to-booking {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        cursor: pointer;
+    }
+    .btn-back-to-booking:hover {
+        background-color: #5a6268;
+    }
+</style>
+
 <div class="container my-5">
     {% if hotel and booking_details %}
     <div class="card mb-5">
@@ -26,12 +62,14 @@
             </div>
             
             <div class="row mb-4">
-                <div class="col-md-12">
+                <div class="text-center mt-2">
                     <strong>Available Photos:</strong>
                     <div class="row">
                         {% if hotel.photos %}
                         <div class="col-md-12 mb-3">
-                            <img src="{{ url_for('hotel_photo', photo_id=hotel.photos[0]) }}" alt="Hotel Main Photo" class="img-fluid rounded">
+                            <a href="{{ url_for('hotel_photo', photo_id=hotel.photos[0]) }}" target="_blank">
+                                <img src="{{ url_for('hotel_photo', photo_id=hotel.photos[0]) }}" alt="Hotel Main Photo" class="img-fluid rounded">
+                            </a>
                             <p class="text-center mt-2"><strong>Main Photo</strong></p>
                         </div>
                         <div class="col-md-12">
@@ -39,7 +77,9 @@
                             <div class="row">
                                 {% for photo_id in hotel.photos[1:] %}
                                 <div class="col-md-4 mb-3">
-                                    <img src="{{ url_for('hotel_photo', photo_id=photo_id) }}" alt="Hotel Room Photo" class="img-fluid rounded">
+                                    <a href="{{ url_for('hotel_photo', photo_id=photo_id) }}" target="_blank">
+                                        <img src="{{ url_for('hotel_photo', photo_id=photo_id) }}" alt="Hotel Room Photo" class="img-fluid rounded">
+                                    </a>
                                 </div>
                                 {% endfor %}
                             </div>
@@ -52,13 +92,11 @@
             </div>
             
             <div class="row mb-4">
-                <div class="col-md-12">
-                    {% if current_user.is_authenticated %}
+                <div class="text-center mt-2">
+
                     <strong>Price per night:</strong> {{ hotel.price_per_night }}<br>
                     <strong>Total Price:</strong> {{ booking_details.hotel_price }}
-                    {% else %}
-                    <strong>Login to see the price</strong>
-                    {% endif %}
+
                 </div>
             </div>
         </div>
@@ -67,7 +105,7 @@
     <div class="card mb-5">
         <div class="card-body">
             <h3 class="card-title mb-4 text-center">Update Booking Details</h3>
-            <form action="{{ url_for('hotel_info') }}" method="POST">
+            <form id="update-booking-form" action="{{ url_for('hotel_info') }}" method="POST">
                 <input type="hidden" name="hotel_id" value="{{ hotel._id }}">
                 <input type="hidden" name="hotel_name" value="{{ hotel.title }}">
                 <input type="hidden" name="hotel_price" value="{{ hotel.price_per_night }}">
@@ -90,17 +128,15 @@
                         <label for="rooms" class="form-label"><strong>Rooms:</strong></label>
                         <input type="number" id="rooms" name="rooms" class="form-control" value="{{ booking_details.rooms }}">
                     </div>
-                    <div class="col-12 text-center">
-                        <button type="submit" class="btn btn-primary mt-3">Update Booking</button>
-                    </div>
                 </div>
             </form>
+            {% if current_user.is_authenticated %}
             <form action="{{ url_for('confirmation') }}" method="GET">
                 <div class="col-12 text-center">
-                    <button type="submit" class="btn btn-success mt-3">Proceed to Confirmation</button>
+                    <button type="submit" class="btn-proceed-confirmation mt-3">Proceed to Confirmation</button>
                 </div>
             </form>
-
+            {% endif %}
             <form action="{{ url_for('booking') }}" method="POST">
                 <div class="col-12 text-center">
                     <input type="hidden" name="destination" value="{{ booking_details.destination }}">
@@ -108,11 +144,9 @@
                     <input type="hidden" name="check_out" value="{{ booking_details.check_out }}">
                     <input type="hidden" name="guests" value="{{ booking_details.guests }}">
                     <input type="hidden" name="rooms" value="{{ booking_details.rooms }}">
-                    <button class="btn btn-secondary mt-3" id="backToBookingBtn">Back to booking</button>
+                    <button class="btn-back-to-booking mt-3" id="backToBookingBtn">Back to booking</button>
                 </div>
             </form>
-
-
         </div>
     </div>
 
@@ -122,4 +156,18 @@
     </div>
     {% endif %}
 </div>
+
+<!-- Script para actualizar el formulario automáticamente -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var updateBookingForm = document.getElementById('update-booking-form');
+        var formElements = updateBookingForm.querySelectorAll('input');
+
+        formElements.forEach(function(element) {
+            element.addEventListener('change', function() {
+                updateBookingForm.submit();
+            });
+        });
+    });
+</script>
 {% endblock %}

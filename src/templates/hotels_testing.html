@@ -26,7 +26,7 @@
     }
     .hotel-photos img {
         width: 100%;
-        height: auto;
+        height: 200px;
         border-radius: 5px;
         object-fit: cover;
     }
@@ -42,6 +42,19 @@
     .room-photo {
         flex: 1 1 calc(33.333% - 10px);
         margin-bottom: 10px;
+    }
+    .btn-book-now {
+        width: 100%;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        text-align: center;
+        cursor: pointer;
+    }
+    .btn-book-now:hover {
+        background-color: #0056b3;
     }
 </style>
 
@@ -84,9 +97,10 @@
             <input type="hidden" name="guests" value="{{ booking_details.guests }}">
             <input type="hidden" name="rooms" value="{{ booking_details.rooms }}">
 
-            <button type="submit" class="btn btn-primary mt-3">Book Now</button>
+            <button type="submit" class="btn-book-now mt-3">Book Now</button>
         </form>
     </div>
     {% endfor %}
 </div>
 {% endblock %}
+

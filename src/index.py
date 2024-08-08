@@ -91,15 +91,25 @@ def login():
         if user_doc and check_password_hash(user_doc['password_hash'], password):
             user = User.from_mongo(user_doc)
             login_user(user)
-            
-            if user.auth_level == 'super_user':
-                return redirect(url_for('super_profile'))
-            elif user.auth_level == 'manager_user':
-                return redirect(url_for('manager_profile'))
+
+            # Recuperar la última URL visitada
+            last_url = request.cookies.get('last_url')
+
+            if last_url:
+                response = make_response(redirect(last_url))
+                response.delete_cookie('last_url')
+                return response
             else:
-                return redirect(url_for('home'))
+                # Redireccionar a la página de inicio según el nivel de autenticación
+                if user.auth_level == 'super_user':
+                    return redirect(url_for('super_profile'))
+                elif user.auth_level == 'manager_user':
+                    return redirect(url_for('manager_profile'))
+                else:
+                    return redirect(url_for('home'))
         else:
             flash('Invalid email or password', 'error')
+
     return render_template('login.html')
 
 
@@ -153,10 +163,8 @@ def user_profile():
 
     if request.method == 'POST':
         if 'update_profile' in request.form:
-            # Actualizar la información del perfil
             name = request.form.get('name')
             lastname = request.form.get('lastname')
-            email = request.form.get('email')
             current_password = request.form.get('current_password')
             new_password = request.form.get('new_password')
 
@@ -164,7 +172,6 @@ def user_profile():
                 update_data = {
                     "name": name,
                     "lastname": lastname,
-                    "email": email,
                 }
 
                 if new_password:
@@ -172,20 +179,18 @@ def user_profile():
 
                 db.users.update_one({"_id": ObjectId(user_id)}, {"$set": update_data})
                 flash("Profile updated successfully!")
+                return redirect(url_for('user_profile'))
             else:
                 flash("Current password is incorrect. Please try again.")
 
         elif 'cancel_booking' in request.form:
-            # Cancelar la reserva
             reservation_id = request.form.get('reservation_id')
             db.reservations.delete_one({"_id": ObjectId(reservation_id)})
             flash("Booking cancelled successfully!")
             reservations = list(db.reservations.find({'user_id': user_id}))
-        # Convertir los IDs de las fotos en ObjectId
-
- 
 
     return render_template('user_profile.html', user_data=user_data, reservations=reservations)
+
 
 @app.route('/user_booking')
 @login_required
@@ -261,8 +266,8 @@ def hotel_info():
         # Update booking details from the form
         check_in = request.form.get('check_in')
         check_out = request.form.get('check_out')
-        guests = request.form.get('guests')
-        rooms = request.form.get('rooms')
+        guests = int(request.form.get('guests', 1))
+        rooms = int(request.form.get('rooms', 1))
 
         booking_details = {
             'destination': session['booking_details'].get('destination', ''),
@@ -279,7 +284,10 @@ def hotel_info():
         check_in_date = datetime.strptime(check_in, '%Y-%m-%d')
         check_out_date = datetime.strptime(check_out, '%Y-%m-%d')
         num_nights = (check_out_date - check_in_date).days
-        booking_details['hotel_price'] = hotel_price * num_nights
+
+        # Update total price calculation
+        total_price = hotel_price * num_nights * guests * rooms
+        booking_details['total_price'] = total_price
 
         # Save updated booking details to the session
         session['booking_details'] = booking_details
@@ -307,8 +315,6 @@ def hotel_info():
         return redirect(url_for('home'))
 
     return render_template('hotel_info.html', hotel=hotel, booking_details=booking_details)
-
-
 
 @app.route('/confirmation')
 @login_required
@@ -376,7 +382,6 @@ def manager_profile():
         if 'update_profile' in request.form:
             name = request.form.get('name')
             lastname = request.form.get('lastname')
-            email = request.form.get('email')
             current_password = request.form.get('current_password')
             new_password = request.form.get('new_password')
 
@@ -387,7 +392,6 @@ def manager_profile():
             update_data = {
                 "name": name,
                 "lastname": lastname,
-                "email": email
             }
             if new_password:
                 update_data["password"] = generate_password_hash(new_password)
@@ -397,6 +401,7 @@ def manager_profile():
             return redirect(url_for('manager_profile'))
 
     return render_template('manager_profile.html', user_data=user_data)
+
 
 @app.route('/manager_listing')
 @login_required
@@ -540,14 +545,37 @@ def delete_reservation(reservation_id):
     return redirect(url_for('manager_bookings'))
 
 
-@app.route('/super_profile')
+@app.route('/super_profile', methods=['GET', 'POST'])
 @login_required
 @role_required('super_user')
 def super_profile():
-    if current_user.auth_level != 'super_user':
-        flash("Access Denied: You don't have the necessary permissions.", 'danger', category='login')
-        return redirect(url_for('login'))
-    return render_template('super_profile.html')
+    user_id = current_user.get_id()
+    user_data = db.users.find_one({"_id": ObjectId(user_id)})
+    
+    if request.method == 'POST':
+        if 'update_profile' in request.form:
+            name = request.form.get('name')
+            lastname = request.form.get('lastname')
+            current_password = request.form.get('current_password')
+            new_password = request.form.get('new_password')
+
+            if not check_password_hash(user_data['password'], current_password):
+                flash('Current password is incorrect!')
+                return redirect(url_for('super_profile'))
+
+            update_data = {
+                "name": name,
+                "lastname": lastname,
+            }
+            if new_password:
+                update_data["password"] = generate_password_hash(new_password)
+
+            db.users.update_one({"_id": ObjectId(user_id)}, {"$set": update_data})
+            flash("Profile updated successfully!")
+            return redirect(url_for('super_profile'))
+
+    return render_template('super_profile.html', user_data=user_data)
+
 
 @app.route('/super_listing')
 @login_required
@@ -641,11 +669,9 @@ def super_edit_manager(manager_id):
     if request.method == 'POST':
         name = request.form['name']
         lastname = request.form['lastname']
-        email = request.form['email']
         db.users.update_one({'_id': ObjectId(manager_id)}, {'$set': {
             'name': name,
             'lastname': lastname,
-            'email': email
         }})
         flash('Manager updated successfully')
         return redirect(url_for('super_manager'))

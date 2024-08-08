@@ -21,10 +21,6 @@
                     <input type="text" class="form-control" id="lastname" name="lastname" value="{{ user_data.lastname }}" required>
                 </div>
                 <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" value="{{ user_data.email }}" required>
-                </div>
-                <div class="mb-3">
                     <label for="current_password" class="form-label">Current Password</label>
                     <input type="password" class="form-control" id="current_password" name="current_password" required>
                 </div>
@@ -44,11 +40,6 @@
         {% for reservation in reservations %}
         <div class="col-md-4 mb-4">
             <div class="card h-100">
-                <div class="hotel-photos mb-3">
-                    {% for photo_id in reservation.hotel_photos %}
-                    <img src="{{ url_for('hotel_photo', photo_id=photo_id) }}" alt="Hotel Photo" class="hotel-photo">
-                    {% endfor %}
-                </div>
                 <div class="card-body">
                     <h5 class="card-title">{{ reservation.hotel_name }}</h5>
                     <p class="card-text"><strong>Check-in:</strong> {{ reservation.check_in }}</p>

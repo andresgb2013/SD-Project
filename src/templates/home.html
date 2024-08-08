@@ -29,6 +29,7 @@
 {% block content %}
 <section id="search">
     <h2 class="h4 mb-3">Find Your Next Adventure</h2>
+    
     <form class="d-flex flex-wrap justify-content-center align-items-center" action="{{ url_for('booking') }}" method="POST">
         <div class="col-md-3">
             <select class="form-select" name="destination" required>

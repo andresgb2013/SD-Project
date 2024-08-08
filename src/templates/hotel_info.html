@@ -4,38 +4,50 @@
 
 {% block content %}
 <style>
-    .btn-update-booking {
-        background-color: #28a745;
+    .btn-update-booking, .btn-proceed-confirmation, .btn-back-to-booking {
         color: white;
         border: none;
         border-radius: 5px;
         padding: 10px 20px;
         cursor: pointer;
+        display: block;
+        width: 100%;
     }
-    .btn-update-booking:hover {
-        background-color: #218838;
+    .btn-update-booking { background-color: #28a745; }
+    .btn-update-booking:hover { background-color: #218838; }
+    .btn-proceed-confirmation { background-color: #17a2b8; }
+    .btn-proceed-confirmation:hover { background-color: #138496; }
+    .btn-back-to-booking { background-color: #6c757d; }
+    .btn-back-to-booking:hover { background-color: #5a6268; }
+
+    .hotel-info-section {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 30px;
     }
-    .btn-proceed-confirmation {
-        background-color: #17a2b8;
-        color: white;
-        border: none;
+    .hotel-info-section div {
+        flex: 1;
+        padding: 10px;
+    }
+    .hotel-info-section div strong {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .hotel-photos {
+        text-align: center;
+    }
+    .hotel-photos img {
+        margin-bottom: 10px;
         border-radius: 5px;
-        padding: 10px 20px;
-        cursor: pointer;
     }
-    .btn-proceed-confirmation:hover {
-        background-color: #138496;
+
+    .booking-details-section {
+        display: flex;
+        justify-content: space-between;
     }
-    .btn-back-to-booking {
-        background-color: #6c757d;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        padding: 10px 20px;
-        cursor: pointer;
-    }
-    .btn-back-to-booking:hover {
-        background-color: #5a6268;
+    .booking-details-section .col-md-6 {
+        padding: 10px;
     }
 </style>
 
@@ -44,61 +56,71 @@
     <div class="card mb-5">
         <div class="card-body">
             <h2 class="card-title mb-4 text-center">{{ hotel.title }}</h2>
-            <div class="row mb-4">
-                <div class="col-md-6">
+            
+            <div class="hotel-info-section">
+                <div>
                     <strong>City:</strong> {{ hotel.address.city }}
                 </div>
-                <div class="col-md-6">
+                <div>
                     <strong>Country:</strong> {{ hotel.address.country }}
                 </div>
             </div>
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <strong>Description:</strong> {{ hotel.description }}
+
+            <!-- Description and Extra Info as sequential blocks -->
+            <div class="hotel-info-section">
+                <div>
+                    <strong>Description:</strong> 
+                    <p>{{ hotel.description }}</p>
                 </div>
-                <div class="col-md-6">
-                    <strong>Extra Info:</strong> {{ hotel.extra_info }}
+            </div>
+            <div class="hotel-info-section">
+                <div>
+                    <strong>Extra Info:</strong> 
+                    <p>{{ hotel.extra_info }}</p>
                 </div>
             </div>
             
-            <div class="row mb-4">
-                <div class="text-center mt-2">
-                    <strong>Available Photos:</strong>
-                    <div class="row">
-                        {% if hotel.photos %}
-                        <div class="col-md-12 mb-3">
+            <div class="hotel-photos">
+                <strong>Available Photos:</strong>
+                <div class="row justify-content-center">
+                    {% if hotel.photos %}
+                        <div class="col-md-6 mb-3">
                             <a href="{{ url_for('hotel_photo', photo_id=hotel.photos[0]) }}" target="_blank">
-                                <img src="{{ url_for('hotel_photo', photo_id=hotel.photos[0]) }}" alt="Hotel Main Photo" class="img-fluid rounded">
+                                <img src="{{ url_for('hotel_photo', photo_id=hotel.photos[0]) }}" alt="Hotel Main Photo" class="img-fluid">
                             </a>
                             <p class="text-center mt-2"><strong>Main Photo</strong></p>
                         </div>
                         <div class="col-md-12">
                             <strong>Room Photos:</strong>
-                            <div class="row">
+                            <div class="row justify-content-center">
                                 {% for photo_id in hotel.photos[1:] %}
                                 <div class="col-md-4 mb-3">
                                     <a href="{{ url_for('hotel_photo', photo_id=photo_id) }}" target="_blank">
-                                        <img src="{{ url_for('hotel_photo', photo_id=photo_id) }}" alt="Hotel Room Photo" class="img-fluid rounded">
+                                        <img src="{{ url_for('hotel_photo', photo_id=photo_id) }}" alt="Hotel Room Photo" class="img-fluid">
                                     </a>
                                 </div>
                                 {% endfor %}
                             </div>
                         </div>
-                        {% else %}
+                    {% else %}
                         <p>No photos available.</p>
-                        {% endif %}
-                    </div>
+                    {% endif %}
                 </div>
             </div>
             
-            <div class="row mb-4">
-                <div class="text-center mt-2">
-
-                    <strong>Price per night:</strong> {{ hotel.price_per_night }}<br>
-                    <strong>Total Price:</strong> {{ booking_details.hotel_price }}
-
+            <div class="hotel-info-section">
+                <div>
+                    {% if current_user.is_authenticated %}
+                    <strong>Price per night:</strong> {{ booking_details.hotel_price }}
+                    </div>
+                    <div>
+                    <strong>Total Price:</strong> {{ booking_details.total_price }}
+                    {% else %}
+                    <strong>Login to see the price</strong>
+                    {% endif %}
                 </div>
             </div>
+            
         </div>
     </div>
 
@@ -111,7 +133,7 @@
                 <input type="hidden" name="hotel_price" value="{{ hotel.price_per_night }}">
                 <input type="hidden" name="hotel_photos" value="{{ hotel.photos }}">
 
-                <div class="row">
+                <div class="booking-details-section">
                     <div class="col-md-6 mb-3">
                         <label for="check_in" class="form-label"><strong>Check-in:</strong></label>
                         <input type="date" id="check_in" name="check_in" class="form-control" value="{{ booking_details.check_in }}">
@@ -120,6 +142,8 @@
                         <label for="check_out" class="form-label"><strong>Check-out:</strong></label>
                         <input type="date" id="check_out" name="check_out" class="form-control" value="{{ booking_details.check_out }}">
                     </div>
+                </div>
+                <div class="booking-details-section">
                     <div class="col-md-6 mb-3">
                         <label for="guests" class="form-label"><strong>Guests:</strong></label>
                         <input type="number" id="guests" name="guests" class="form-control" value="{{ booking_details.guests }}">
@@ -171,3 +195,4 @@
     });
 </script>
 {% endblock %}
+

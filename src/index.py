@@ -156,6 +156,7 @@ def home():
 
 @app.route('/user_profile', methods=['GET', 'POST'])
 @login_required
+@role_required('regular')
 def user_profile():
     user_id = current_user.get_id()
     user_data = db.users.find_one({"_id": ObjectId(user_id)})
@@ -172,6 +173,7 @@ def user_profile():
                 update_data = {
                     "name": name,
                     "lastname": lastname,
+
                 }
 
                 if new_password:
@@ -208,14 +210,17 @@ def booking_cancel():
 
 @app.route('/booking', methods=['GET', 'POST'])
 def booking():
+    cities = list(cities_collection.find())  # Recuperamos las ciudades desde la BD.
+    
     if request.method == 'POST':
-        cities = list(cities_collection.find())
+        # Datos enviados desde el formulario
         destination = request.form['destination']
         check_in = request.form['check_in']
         check_out = request.form['check_out']
         guests = request.form['guests']
         rooms = request.form['rooms']
 
+        # Guardamos los detalles en la sesión
         booking_details = {
             'destination': destination,
             'check_in': check_in,
@@ -223,10 +228,11 @@ def booking():
             'guests': guests,
             'rooms': rooms
         }
-
         session['booking_details'] = booking_details
+
+        # Recuperamos hoteles en la ciudad seleccionada
         hotels = list(hotels_collection.find({'address.city': destination}))
-        return render_template('booking.html', booking_details=booking_details, hotels=hotels,cities= cities)
+        return render_template('booking.html', booking_details=booking_details, hotels=hotels, cities=cities)
 
     elif request.method == 'GET':
         destination = request.args.get('destination')
@@ -240,11 +246,13 @@ def booking():
                 'guests': 1,
                 'rooms': 1
             }
-        session['booking_details'] = booking_details
-        hotels = list(hotels_collection.find({'address.city': destination}))
-        return render_template('hotels_testing.html', destination=destination, hotels=hotels, booking_details=booking_details)
+            session['booking_details'] = booking_details
+
+            hotels = list(hotels_collection.find({'address.city': destination}))
+            return render_template('hotels_testing.html', destination=destination, hotels=hotels, booking_details=booking_details, cities=cities)
 
     return redirect(url_for('home'))
+
 
 
 @app.route('/hotel_info', methods=['GET', 'POST'])
@@ -259,16 +267,18 @@ def hotel_info():
             flash('Invalid hotel ID format. Please start your booking again.')
             return redirect(url_for('home'))
 
+        # Detalles del hotel y la reserva
         hotel_name = request.form['hotel_name']
         hotel_price = float(request.form['hotel_price'])
         hotel_photos = request.form.getlist('hotel_photos')
 
-        # Update booking details from the form
+        # Actualizar detalles de la reserva
         check_in = request.form.get('check_in')
         check_out = request.form.get('check_out')
         guests = int(request.form.get('guests', 1))
         rooms = int(request.form.get('rooms', 1))
 
+        # Guardar los detalles de la reserva en la sesión
         booking_details = {
             'destination': session['booking_details'].get('destination', ''),
             'check_in': check_in,
@@ -277,24 +287,16 @@ def hotel_info():
             'rooms': rooms,
             'hotel_name': hotel_name,
             'hotel_price': hotel_price,
-            'hotel_photos': hotel_photos
+            'hotel_photos': hotel_photos,
+            'total_price': hotel_price * (datetime.strptime(check_out, '%Y-%m-%d') - datetime.strptime(check_in, '%Y-%m-%d')).days * guests
         }
-
-        # Calculate the total price
-        check_in_date = datetime.strptime(check_in, '%Y-%m-%d')
-        check_out_date = datetime.strptime(check_out, '%Y-%m-%d')
-        num_nights = (check_out_date - check_in_date).days
-
-        # Update total price calculation
-        total_price = hotel_price * num_nights * guests * rooms
-        booking_details['total_price'] = total_price
-
-        # Save updated booking details to the session
         session['booking_details'] = booking_details
 
-        flash('Booking details updated successfully!')
-        return render_template('hotel_info.html', hotel=hotels_collection.find_one({'_id': hotel_object_id}), booking_details=booking_details)
+        # Renderizar la página con la información del hotel y los detalles actualizados.
+        hotel = hotels_collection.find_one({'_id': hotel_object_id})
+        return render_template('hotel_info.html', hotel=hotel, booking_details=booking_details)
 
+    # Método GET: mostrar detalles del hotel seleccionado.
     try:
         hotel_id = request.args.get('hotel_id')
         if not hotel_id:
@@ -316,8 +318,11 @@ def hotel_info():
 
     return render_template('hotel_info.html', hotel=hotel, booking_details=booking_details)
 
+
 @app.route('/confirmation')
 @login_required
+@role_required('regular')
+
 def confirmation():
     booking_details = session.get('booking_details', {})
     if not booking_details:
@@ -345,6 +350,7 @@ def confirmation():
 
 @app.route('/confirm_booking', methods=['POST'])
 @login_required
+@role_required('regular')
 def confirm_booking():
     booking_details = session.get('booking_details', {})
     if not booking_details:
@@ -352,7 +358,14 @@ def confirm_booking():
         return redirect(url_for('login'))
 
     user_id = current_user.get_id()
+    
+    # Obtén los datos de pago desde el formulario
+    payment_method = request.form.get('payment_method')
+    card_number = request.form.get('card_number')
+    expiration_date = request.form.get('expiration_date')
+    cvv = request.form.get('cvv')
 
+    # Construye el diccionario de reserva
     reservation = {
         'user_id': user_id,
         'hotel_name': booking_details['hotel_name'],
@@ -360,15 +373,33 @@ def confirm_booking():
         'check_out': booking_details['check_out'],
         'guests': booking_details['guests'],
         'rooms': booking_details['rooms'],
-        'total_price': booking_details['hotel_price'],
+        'total_price': booking_details['total_price'],
         'hotel_photos': booking_details['hotel_photos'],
+        'payment_method': payment_method,
         'created_at': datetime.now()
     }
 
-    reservations_collection.insert_one(reservation)
-    flash('Booking confirmed!')
+    # Agrega la información de la tarjeta solo si no es "Cash"
+    if payment_method != 'Cash':
+        reservation.update({
+            'card_number': card_number,
+            'expiration_date': expiration_date,
+            'cvv': cvv
+        })
 
+    reservations_collection.insert_one(reservation)
+
+    # Reducción de la cantidad de huéspedes en el hotel
+    hotel_title = booking_details['hotel_name']
+    guests = booking_details['guests']
+    hotels_collection.update_one(
+        {'title': hotel_title},
+        {'$inc': {'no_of_guests': -guests}}
+    )
+
+    flash('Booking confirmed!')
     return redirect(url_for('user_profile'))
+
 
 #Rutas de Gestión de Usuarios
 @app.route('/manager_profile', methods=['GET', 'POST'])
@@ -385,7 +416,7 @@ def manager_profile():
             current_password = request.form.get('current_password')
             new_password = request.form.get('new_password')
 
-            if not check_password_hash(user_data['password'], current_password):
+            if not check_password_hash(user_data['password_hash'], current_password):
                 flash('Current password is incorrect!')
                 return redirect(url_for('manager_profile'))
 
@@ -394,7 +425,7 @@ def manager_profile():
                 "lastname": lastname,
             }
             if new_password:
-                update_data["password"] = generate_password_hash(new_password)
+                update_data["password_hash"] = generate_password_hash(new_password)
 
             db.users.update_one({"_id": ObjectId(user_id)}, {"$set": update_data})
             flash("Profile updated successfully!")
@@ -430,7 +461,10 @@ def manager_hotel_editing(hotel_id):
         street2 = request.form.get('street2', '')
         street3 = request.form.get('street3', '')
         postal_code = request.form['postal_code']
-        city = request.form['city']
+        
+        city_id = request.form['city']  # Capturamos el ID de la ciudad
+        city = next((city['name'] for city in cities if str(city['_id']) == city_id), None)  # Buscamos el nombre basado en el ID
+
         country = request.form['country']
         description = request.form['description']
         extra_info = request.form.get('extra_info', '')
@@ -444,7 +478,8 @@ def manager_hotel_editing(hotel_id):
                 'street2': street2,
                 'street3': street3,
                 'postal_code': postal_code,
-                'city': city,
+                'city_id': city_id,  # Guardamos el ID de la ciudad
+                'city': city,  # Guardamos el nombre de la ciudad
                 'country': country
             },
             'description': description,
@@ -481,6 +516,7 @@ def manager_hotel_editing(hotel_id):
         return redirect(url_for('manager_listing'))
 
     return render_template('hotel_editing.html', hotel=hotel, cities=cities)
+
 
 
 @app.route('/delete_hotel/<hotel_id>', methods=['POST'])
@@ -744,7 +780,10 @@ def add_hotel():
         street2 = request.form.get('street2', '')
         street3 = request.form.get('street3', '')
         postal_code = request.form['postal_code']
-        city = request.form['city']
+        
+        city_id = request.form['city']  # Captura el ID de la ciudad
+        city = next((city['name'] for city in cities if str(city['_id']) == city_id), None)  # Busca el nombre basado en el ID
+
         country = request.form['country']
         description = request.form['description']
         extra_info = request.form.get('extra_info', '')
@@ -768,7 +807,8 @@ def add_hotel():
                 'street2': street2,
                 'street3': street3,
                 'postal_code': postal_code,
-                'city': city,
+                'city_id': city_id,  # Almacena el ID de la ciudad
+                'city': city,  # Almacena el nombre de la ciudad
                 'country': country
             },
             'photos': photo_ids,
@@ -783,6 +823,7 @@ def add_hotel():
         return redirect(url_for('manager_profile'))
 
     return render_template('add_hotel.html', cities=cities)
+
 
 
 

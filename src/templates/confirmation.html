@@ -14,15 +14,6 @@
                 {% endfor %}
             </div>
             
-            <h4 class="mb-3">Your Trip</h4>
-            <p><strong>Check-in:</strong> {{ booking_details.check_in }} at 3 PM</p>
-            <p><strong>Check-out:</strong> {{ booking_details.check_out }} at  11 AM </p>
-            <p><strong>Guests:</strong> {{ booking_details.guests }}</p>
-            <p><strong>Rooms:</strong> {{ booking_details.rooms }}</p>
-            
-            <h4 class="mb-3">Price Details</h4>
-            <p><strong>Total Price:</strong> {{ booking_details.hotel_price }} EUR</p>
-            
             <h4 class="mb-3">Payment Information</h4>
             <form action="{{ url_for('confirm_booking') }}" method="POST">
                 <div class="mb-3">
@@ -31,29 +22,52 @@
                         <option value="">Select Payment Method</option>
                         <option value="Credit Card">Credit Card</option>
                         <option value="Debit Card">Debit Card</option>
+                        <option value="Cash">Cash</option>
                         <option value="PayPal">PayPal</option>
                     </select>
                 </div>
-                <div class="mb-3">
-                    <label for="card_number" class="form-label"><strong>Card Number:</strong></label>
-                    <input type="text" id="card_number" name="card_number" class="form-control" required>
+            
+                <!-- Payment fields -->
+                <div id="card_info" style="display: none;">
+                    <div class="mb-3">
+                        <label for="card_number" class="form-label"><strong>Card Number:</strong></label>
+                        <input type="text" id="card_number" name="card_number" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label for="expiration_date" class="form-label"><strong>Expiration Date:</strong></label>
+                        <input type="text" id="expiration_date" name="expiration_date" class="form-control" placeholder="MM/YY">
+                    </div>
+                    <div class="mb-3">
+                        <label for="cvv" class="form-label"><strong>CVV:</strong></label>
+                        <input type="text" id="cvv" name="cvv" class="form-control">
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label for="expiration_date" class="form-label"><strong>Expiration Date:</strong></label>
-                    <input type="text" id="expiration_date" name="expiration_date" class="form-control" placeholder="MM/YY" required>
-                </div>
-                <div class="mb-3">
-                    <label for="cvv" class="form-label"><strong>CVV:</strong></label>
-                    <input type="text" id="cvv" name="cvv" class="form-control" required>
-                </div>
-
+            
                 <h5 class="mb-3">Cancellation Policy</h5>
                 <p class="small">
                     You can cancel your booking up to 24 hours before check-in time for a full refund. After that, a cancellation fee equal to one night's stay will apply.
                 </p>
-
+            
                 <button type="submit" class="btn btn-primary">Confirm Booking</button>
             </form>
+            
+            <script>
+                document.getElementById('payment_method').addEventListener('change', function() {
+                    var cardInfo = document.getElementById('card_info');
+                    if (this.value === 'Cash') {
+                        cardInfo.style.display = 'none';
+                        document.getElementById('card_number').required = false;
+                        document.getElementById('expiration_date').required = false;
+                        document.getElementById('cvv').required = false;
+                    } else {
+                        cardInfo.style.display = 'block';
+                        document.getElementById('card_number').required = true;
+                        document.getElementById('expiration_date').required = true;
+                        document.getElementById('cvv').required = true;
+                    }
+                });
+            </script>
+            
         </div>
     </div>
     {% else %}

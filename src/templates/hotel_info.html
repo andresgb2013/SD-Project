@@ -49,6 +49,15 @@
     .booking-details-section .col-md-6 {
         padding: 10px;
     }
+
+    .img-clickable {
+        transition: all 0.3s ease;
+    }
+    .img-clickable:hover {
+        cursor: pointer;
+        box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+        transform: scale(1.05);
+    }
 </style>
 
 <div class="container my-5">
@@ -85,9 +94,7 @@
                 <div class="row justify-content-center">
                     {% if hotel.photos %}
                         <div class="col-md-6 mb-3">
-                            <a href="{{ url_for('hotel_photo', photo_id=hotel.photos[0]) }}" target="_blank">
-                                <img src="{{ url_for('hotel_photo', photo_id=hotel.photos[0]) }}" alt="Hotel Main Photo" class="img-fluid">
-                            </a>
+                            <img src="{{ url_for('hotel_photo', photo_id=hotel.photos[0]) }}" alt="Hotel Main Photo" class="img-fluid img-clickable" data-bs-toggle="modal" data-bs-target="#photoModal" onclick="showPhoto('{{ url_for('hotel_photo' ,  photo_id=hotel.photos[0]) }}')">
                             <p class="text-center mt-2"><strong>Main Photo</strong></p>
                         </div>
                         <div class="col-md-12">
@@ -95,9 +102,7 @@
                             <div class="row justify-content-center">
                                 {% for photo_id in hotel.photos[1:] %}
                                 <div class="col-md-4 mb-3">
-                                    <a href="{{ url_for('hotel_photo', photo_id=photo_id) }}" target="_blank">
-                                        <img src="{{ url_for('hotel_photo', photo_id=photo_id) }}" alt="Hotel Room Photo" class="img-fluid">
-                                    </a>
+                                    <img src="{{ url_for('hotel_photo', photo_id=photo_id) }}" alt="Hotel Room Photo" class="img-fluid img-clickable" data-bs-toggle="modal" data-bs-target="#photoModal" onclick="showPhoto('{{ url_for('hotel_photo', photo_id=photo_id) }}')">
                                 </div>
                                 {% endfor %}
                             </div>
@@ -181,6 +186,21 @@
     {% endif %}
 </div>
 
+<!-- Modal -->
+<div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="photoModalLabel">Hotel Photo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <img id="modalPhoto" src="" class="img-fluid" alt="Hotel Photo">
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Script para actualizar el formulario automáticamente -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -193,6 +213,11 @@
             });
         });
     });
+
+    // Function to show the photo in the modal
+    function showPhoto(photoUrl) {
+        var modalPhoto = document.getElementById('modalPhoto');
+        modalPhoto.src = photoUrl;
+    }
 </script>
 {% endblock %}
-

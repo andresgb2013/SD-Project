@@ -9,60 +9,75 @@
     <div class="card mb-4">
         <div class="card-body">
             <h4 class="card-title">Hotel Information</h4>
-            <form action="{{ url_for('manager_hotel_editing', hotel_id=hotel._id) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ url_for('manager_hotel_editing', hotel_id=hotel._id) }}" method="POST"
+                enctype="multipart/form-data">
                 <div class="mb-3">
                     <label for="title" class="form-label">Hotel Title</label>
                     <input type="text" class="form-control" id="title" name="title" value="{{ hotel.title }}" required>
                 </div>
                 <div class="mb-3">
                     <label for="street1" class="form-label">Street Address 1</label>
-                    <input type="text" class="form-control" id="street1" name="street1" value="{{ hotel.address.street1 }}" required>
+                    <input type="text" class="form-control" id="street1" name="street1"
+                        value="{{ hotel.address.street1 }}" required>
                 </div>
                 <div class="mb-3">
                     <label for="street2" class="form-label">Street Address 2</label>
-                    <input type="text" class="form-control" id="street2" name="street2" value="{{ hotel.address.street2 }}">
+                    <input type="text" class="form-control" id="street2" name="street2"
+                        value="{{ hotel.address.street2 }}">
                 </div>
                 <div class="mb-3">
                     <label for="street3" class="form-label">Street Address 3</label>
-                    <input type="text" class="form-control" id="street3" name="street3" value="{{ hotel.address.street3 }}">
+                    <input type="text" class="form-control" id="street3" name="street3"
+                        value="{{ hotel.address.street3 }}">
                 </div>
                 <div class="mb-3">
                     <label for="postal_code" class="form-label">Postal Code</label>
-                    <input type="text" class="form-control" id="postal_code" name="postal_code" value="{{ hotel.address.postal_code }}" required>
+                    <input type="text" class="form-control" id="postal_code" name="postal_code"
+                        value="{{ hotel.address.postal_code }}" required>
                 </div>
                 <div class="mb-3">
                     <label for="city" class="form-label">City</label>
                     <select class="form-select" id="city" name="city" required>
                         <option value="">Select City</option>
                         {% for city in cities %}
-                        <option value="{{ city.name }}" {% if city.name == hotel.address.city %}selected{% endif %}>{{ city.name }}</option>
+                        <option value="{{ city._id }}" {% if city._id == hotel.address.city_id %}selected{% endif %}>
+                            {{ city.name }}
+                        </option>
                         {% endfor %}
                     </select>
                 </div>
+                
                 <div class="mb-3">
                     <label for="country" class="form-label">Country</label>
-                    <input type="text" class="form-control" id="country" name="country" value="{{ hotel.address.country }}" required>
+                    <input type="text" class="form-control" id="country" name="country"
+                        value="{{ hotel.address.country }}" required>
                 </div>
                 <div class="mb-3">
                     <label for="description" class="form-label">Description</label>
-                    <textarea class="form-control" id="description" name="description" rows="3" required>{{ hotel.description }}</textarea>
+                    <textarea class="form-control" id="description" name="description" rows="3"
+                        required>{{ hotel.description }}</textarea>
                 </div>
                 <div class="mb-3">
                     <label for="extra_info" class="form-label">Extra Info</label>
-                    <textarea class="form-control" id="extra_info" name="extra_info" rows="3">{{ hotel.extra_info }}</textarea>
+                    <textarea class="form-control" id="extra_info" name="extra_info"
+                        rows="3">{{ hotel.extra_info }}</textarea>
                 </div>
                 <div class="mb-3">
                     <label for="no_of_guests" class="form-label">Number of Guests</label>
-                    <input type="number" class="form-control" id="no_of_guests" name="no_of_guests" value="{{ hotel.no_of_guests }}" required>
+                    <input type="number" class="form-control" id="no_of_guests" name="no_of_guests"
+                        value="{{ hotel.no_of_guests }}" required>
                 </div>
                 <div class="mb-3">
                     <label for="price_per_night" class="form-label">Price per Night</label>
-                    <input type="number" step="0.01" class="form-control" id="price_per_night" name="price_per_night" value="{{ hotel.price_per_night }}" required>
+                    <input type="number" step="0.01" class="form-control" id="price_per_night" name="price_per_night"
+                        value="{{ hotel.price_per_night }}" required>
                 </div>
+
                 <div class="mb-3">
-                    <label for="photos" class="form-label">Add New Photos</label>
+                    <label for="photos" class="form-label">Add Photos</label>
                     <input type="file" class="form-control" id="photos" name="photos" accept="image/*" multiple>
                 </div>
+
                 <div class="mb-3">
                     <label for="existing_photos" class="form-label">Existing Photos</label>
                     <div class="row">
@@ -71,14 +86,17 @@
                             <div class="card">
                                 <img src="{{ url_for('get_photo', photo_id=photo_id) }}" class="card-img-top" alt="...">
                                 <div class="card-body text-center">
-                                    <button type="submit" name="delete_photo" value="{{ photo_id }}" class="btn btn-danger btn-sm">Delete</button>
+                                    <button type="submit" name="delete_photo" value="{{ photo_id }}"
+                                        class="btn btn-danger btn-sm">Delete</button>
                                 </div>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
                 </div>
+
                 <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a href="{{ url_for('manager_listing') }}" class="btn btn-secondary">Cancel</a>
             </form>
         </div>
     </div>

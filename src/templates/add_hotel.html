@@ -35,10 +35,10 @@
                     <select class="form-select" id="city" name="city" required>
                         <option value="">Select City</option>
                         {% for city in cities %}
-                        <option value="{{ city.name }}">{{ city.name }}</option>
+                        <option value="{{ city._id }}">{{ city.name }}</option>  <!-- Usamos city._id como valor -->
                         {% endfor %}
                     </select>
-                </div>
+                </div>                                
                 <div class="mb-3">
                     <label for="country" class="form-label">Country</label>
                     <input type="text" class="form-control" id="country" name="country" required>

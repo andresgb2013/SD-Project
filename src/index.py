@@ -173,7 +173,6 @@ def user_profile():
                 update_data = {
                     "name": name,
                     "lastname": lastname,
-
                 }
 
                 if new_password:
@@ -187,52 +186,53 @@ def user_profile():
 
         elif 'cancel_booking' in request.form:
             reservation_id = request.form.get('reservation_id')
-            db.reservations.delete_one({"_id": ObjectId(reservation_id)})
-            flash("Booking cancelled successfully!")
-            reservations = list(db.reservations.find({'user_id': user_id}))
-
+            
+            # Obtener detalles de la reserva
+            reservation = db.reservations.find_one({"_id": ObjectId(reservation_id)})
+            if reservation:
+                hotel_id = reservation['hotel_id']
+                guests_to_release = reservation['guests']
+                
+                # Eliminar la reserva
+                db.reservations.delete_one({"_id": ObjectId(reservation_id)})
+                
+                # Actualizar la disponibilidad de huéspedes en el hotel
+                db.hotels.update_one(
+                    {"_id": ObjectId(hotel_id)},
+                    {"$inc": {"no_of_guests": guests_to_release}}
+                )
+                
+                flash("Booking cancelled successfully!")
+                reservations = list(db.reservations.find({'user_id': user_id}))
+    
     return render_template('user_profile.html', user_data=user_data, reservations=reservations)
 
 
-@app.route('/user_booking')
-@login_required
-def user_booking():
-    if session.get('authenticated'):
-        return redirect(url_for('login'))
-    return render_template('user_booking.html')
-
-@app.route('/booking_cancel')
-def booking_cancel():
-    if session.get('authenticated'):
-        return redirect(url_for('login'))
-    return render_template('booking_cancel.html')
-
+from flask import session, redirect, url_for, request, render_template
+from datetime import datetime, timedelta
 
 @app.route('/booking', methods=['GET', 'POST'])
 def booking():
     cities = list(cities_collection.find())  # Recuperamos las ciudades desde la BD.
-    
+
     if request.method == 'POST':
         # Datos enviados desde el formulario
         destination = request.form['destination']
         check_in = request.form['check_in']
         check_out = request.form['check_out']
-        guests = request.form['guests']
-        rooms = request.form['rooms']
-
+        guests = int(request.form['guests'])  # Asegurarse de que sea un entero
+        
         # Guardamos los detalles en la sesión
         booking_details = {
             'destination': destination,
             'check_in': check_in,
             'check_out': check_out,
-            'guests': guests,
-            'rooms': rooms
+            'guests': guests
         }
         session['booking_details'] = booking_details
 
-        # Recuperamos hoteles en la ciudad seleccionada
-        hotels = list(hotels_collection.find({'address.city': destination}))
-        return render_template('booking.html', booking_details=booking_details, hotels=hotels, cities=cities)
+        # Redirigimos inmediatamente a una URL sin POST
+        return redirect(url_for('booking'))
 
     elif request.method == 'GET':
         destination = request.args.get('destination')
@@ -243,15 +243,30 @@ def booking():
                 'destination': destination,
                 'check_in': check_in,
                 'check_out': check_out,
-                'guests': 1,
-                'rooms': 1
+                'guests': 1  # Default
             }
             session['booking_details'] = booking_details
 
-            hotels = list(hotels_collection.find({'address.city': destination}))
+            hotels = list(hotels_collection.find({
+                'address.city': destination,
+                'no_of_guests': {'$gte': 1}  # Filtro por número de huéspedes
+            }))
             return render_template('hotels_testing.html', destination=destination, hotels=hotels, booking_details=booking_details, cities=cities)
 
+        # Manejamos el GET normal mostrando la información en la página booking.html
+        booking_details = session.get('booking_details')
+        if booking_details:
+            hotels = list(hotels_collection.find({
+                'address.city': booking_details['destination'],
+                'no_of_guests': {'$gte': booking_details['guests']}  # Filtro por número de huéspedes
+            }))
+        else:
+            hotels = []
+        
+        return render_template('booking.html', booking_details=booking_details, hotels=hotels, cities=cities)
+
     return redirect(url_for('home'))
+
 
 
 
@@ -276,7 +291,7 @@ def hotel_info():
         check_in = request.form.get('check_in')
         check_out = request.form.get('check_out')
         guests = int(request.form.get('guests', 1))
-        rooms = int(request.form.get('rooms', 1))
+        #rooms = int(request.form.get('rooms', 1))
 
         # Guardar los detalles de la reserva en la sesión
         booking_details = {
@@ -284,7 +299,7 @@ def hotel_info():
             'check_in': check_in,
             'check_out': check_out,
             'guests': guests,
-            'rooms': rooms,
+            'hotel_id': hotel_id,
             'hotel_name': hotel_name,
             'hotel_price': hotel_price,
             'hotel_photos': hotel_photos,
@@ -372,7 +387,7 @@ def confirm_booking():
         'check_in': booking_details['check_in'],
         'check_out': booking_details['check_out'],
         'guests': booking_details['guests'],
-        'rooms': booking_details['rooms'],
+        'hotel_id': booking_details['hotel_id'],
         'total_price': booking_details['total_price'],
         'hotel_photos': booking_details['hotel_photos'],
         'payment_method': payment_method,
@@ -399,6 +414,8 @@ def confirm_booking():
 
     flash('Booking confirmed!')
     return redirect(url_for('user_profile'))
+
+
 
 
 #Rutas de Gestión de Usuarios
@@ -523,8 +540,19 @@ def manager_hotel_editing(hotel_id):
 @login_required
 @role_required('manager_user')
 def delete_hotel(hotel_id):
-    db.hotels.delete_one({"_id": ObjectId(hotel_id)})
-    flash('Hotel deleted successfully!')
+    try:
+        # Eliminar todas las reservas asociadas al hotel
+        db.reservations.delete_many({"hotel_id": hotel_id})
+
+        # Eliminar el hotel
+        db.hotels.delete_one({"_id": ObjectId(hotel_id)})
+
+        flash('Hotel and associated reservations deleted successfully!')
+
+    except Exception as e:
+        # Manejar excepciones y proporcionar retroalimentación
+        flash(f'An error occurred: {e}')
+
     return redirect(url_for('manager_listing'))
 
 @app.route('/manager_bookings')
@@ -553,7 +581,7 @@ def edit_reservation(reservation_id):
         check_in = request.form['check_in']
         check_out = request.form['check_out']
         guests = int(request.form['guests'])
-        rooms = int(request.form['rooms'])
+        #rooms = int(request.form['rooms'])
         total_price = float(request.form['total_price'])
         
         db.reservations.update_one(
@@ -562,7 +590,7 @@ def edit_reservation(reservation_id):
                 "check_in": check_in,
                 "check_out": check_out,
                 "guests": guests,
-                "rooms": rooms,
+                #"rooms": rooms,
                 "total_price": total_price
             }}
         )
@@ -576,9 +604,39 @@ def edit_reservation(reservation_id):
 @login_required
 @role_required('manager_user')
 def delete_reservation(reservation_id):
-    db.reservations.delete_one({"_id": ObjectId(reservation_id)})
-    flash('Reservation deleted successfully!')
+    try:
+        # Recuperar la reserva
+        reservation = db.reservations.find_one({"_id": ObjectId(reservation_id)})
+        if not reservation:
+            flash('Reservation not found!')
+            return redirect(url_for('manager_bookings'))
+
+        hotel_id = reservation['hotel_id']
+        guests_to_release = reservation['guests']
+
+        # Eliminar la reserva
+        db.reservations.delete_one({"_id": ObjectId(reservation_id)})
+
+        # Actualizar la disponibilidad de huéspedes en el hotel
+        db.hotels.update_one(
+            {"_id": ObjectId(hotel_id)},
+            {"$inc": {"no_of_guests": guests_to_release}}
+        )
+
+        flash('Reservation deleted and hotel availability updated successfully!')
+    
+    except Exception as e:
+        # Manejar excepciones y proporcionar retroalimentación
+        flash(f'An error occurred: {e}')
+
     return redirect(url_for('manager_bookings'))
+
+
+
+
+
+
+
 
 
 @app.route('/super_profile', methods=['GET', 'POST'])
@@ -762,9 +820,38 @@ def delete_city(city_id):
         flash("Access Denied: You don't have the necessary permissions.", 'danger', category='login')
         return redirect(url_for('login'))
     
-    cities_collection.delete_one({"_id": ObjectId(city_id)})
-    flash('City deleted successfully', 'success')
+    try:
+        # Convertir city_id a ObjectId
+        city_id = ObjectId(city_id)
+
+        # Eliminar todos los hoteles asociados a la ciudad
+        hotels = list(db.hotels.find({"address.city_id": city_id}))
+        hotel_ids = [hotel['_id'] for hotel in hotels]
+        
+        if hotel_ids:
+            print(f"Hotel IDs to be deleted: {hotel_ids}")  # Depuración
+            
+            # Eliminar las reservas asociadas a los hoteles
+            result_reservations = db.reservations.delete_many({"hotel_id": {"$in": hotel_ids}})
+            print(f"Reservations deleted: {result_reservations.deleted_count}")  # Depuración
+
+            # Eliminar los hoteles
+            result_hotels = db.hotels.delete_many({"_id": {"$in": hotel_ids}})
+            print(f"Hotels deleted: {result_hotels.deleted_count}")  # Depuración
+        
+        # Finalmente, eliminar la ciudad
+        result_city = cities_collection.delete_one({"_id": city_id})
+        if result_city.deleted_count == 0:
+            raise Exception("City not found or could not be deleted.")
+
+        flash('City and all associated hotels and reservations deleted successfully!', 'success')
+    except Exception as e:
+        # Manejar excepciones y proporcionar retroalimentación
+        flash(f'An error occurred: {e}', 'danger')
+    
     return redirect(url_for('super_listing'))
+
+
 
 # Rutas de Gestión de Hoteles
 

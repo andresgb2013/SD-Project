@@ -45,7 +45,6 @@
                     <p class="card-text"><strong>Check-in:</strong> {{ reservation.check_in }}</p>
                     <p class="card-text"><strong>Check-out:</strong> {{ reservation.check_out }}</p>
                     <p class="card-text"><strong>Guests:</strong> {{ reservation.guests }}</p>
-                    <p class="card-text"><strong>Rooms:</strong> {{ reservation.rooms }}</p>
                     <p class="card-text"><strong>Total Price:</strong> {{ reservation.total_price }} EUR</p>
                     <form action="{{ url_for('user_profile') }}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this booking?');">
                         <input type="hidden" name="cancel_booking" value="1">

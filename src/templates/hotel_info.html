@@ -151,11 +151,8 @@
                 <div class="booking-details-section">
                     <div class="col-md-6 mb-3">
                         <label for="guests" class="form-label"><strong>Guests:</strong></label>
-                        <input type="number" id="guests" name="guests" class="form-control" value="{{ booking_details.guests }}">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="rooms" class="form-label"><strong>Rooms:</strong></label>
-                        <input type="number" id="rooms" name="rooms" class="form-control" value="{{ booking_details.rooms }}">
+                        <input type="number" id="guests" name="guests" class="form-control" min="1" max ="{{ hotel.no_of_guests }}"  value="{{ booking_details.guests }}">
+
                     </div>
                 </div>
             </form>
@@ -172,7 +169,6 @@
                     <input type="hidden" name="check_in" value="{{ booking_details.check_in }}">
                     <input type="hidden" name="check_out" value="{{ booking_details.check_out }}">
                     <input type="hidden" name="guests" value="{{ booking_details.guests }}">
-                    <input type="hidden" name="rooms" value="{{ booking_details.rooms }}">
                     <button class="btn-back-to-booking mt-3" id="backToBookingBtn">Back to booking</button>
                 </div>
             </form>

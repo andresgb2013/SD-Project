@@ -87,10 +87,6 @@
                         <label for="guests" class="form-label"><strong>Guests:</strong></label>
                         <input type="number" id="guests" name="guests" class="form-control" value="{{ booking_details.guests }}" min="1" required>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="rooms" class="form-label"><strong>Rooms:</strong></label>
-                        <input type="number" id="rooms" name="rooms" class="form-control" value="{{ booking_details.rooms }}" min="1" required>
-                    </div>
                     <div class="col-12 text-center">
                         <button type="submit" class="btn btn-primary mt-3">Update Booking</button>
                     </div>
@@ -98,6 +94,18 @@
             </form>
         </div>
     </div>
+
+
+    <div class="card mb-5">
+        <div class="card-body">
+            <h3 class="card-title mb-4 text-center">Your Selected Options</h3>
+            <p><strong>Destination:</strong> {{ booking_details.destination }}</p>
+            <p><strong>Check-in:</strong> {{ booking_details.check_in }}</p>
+            <p><strong>Check-out:</strong> {{ booking_details.check_out }}</p>
+            <p><strong>Guests:</strong> {{ booking_details.guests }}</p>
+        </div>
+    </div>
+    
 
     <div class="mt-5">
         <h4 class="mb-3 text-center">Available Hotels</h4>
@@ -136,8 +144,6 @@
                     <input type="hidden" name="check_in" value="{{ booking_details.check_in }}">
                     <input type="hidden" name="check_out" value="{{ booking_details.check_out }}">
                     <input type="hidden" name="guests" value="{{ booking_details.guests }}">
-                    <input type="hidden" name="rooms" value="{{ booking_details.rooms }}">
-
                     <button type="submit" class="btn-book-now mt-3">Book Now</button>
                 </form>
             </div>

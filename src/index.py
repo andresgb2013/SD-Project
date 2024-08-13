@@ -12,6 +12,8 @@ from middleware import LastURLMiddleware
 
 
 
+
+
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'your_secret_key')
 app.wsgi_app = LastURLMiddleware(app.wsgi_app)
@@ -19,6 +21,7 @@ app.wsgi_app = LastURLMiddleware(app.wsgi_app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+app.config['images'] = 'static/images'
 
 # Configuración de la conexión a MongoDB
 client = pymongo.MongoClient('mongodb+srv://andresgb2013:DN0kJdOtj5eJmoo3@cluster0.jzfu1jp.mongodb.net/')
@@ -698,26 +701,74 @@ def super_manager():
 @role_required('super_user')
 def super_add_city():
     if current_user.auth_level != 'super_user':
-        flash("Access Denied: You don't have the necessary permissions.", 'danger', category='login')
+        flash("Access Denied: You don't have the necessary permissions.", 'danger')
         return redirect(url_for('home'))
-    
+
     if request.method == 'POST':
         name = request.form['name']
         country = request.form['country']
-        description= request.form['description']
+        description = request.form['description']
+
+        image = request.files.get('image')
+        image_url = None
+        if image and image.filename:
+            filename = secure_filename(image.filename)
+            image_url = os.path.join(app.config['images'], filename)
+            image.save(image_url)
 
         city_data = {
             'name': name,
             'country': country,
-            'description': description
-
+            'description': description,
+            'image_url': filename if image_url else None  # Guardar solo el nombre del archivo
         }
-        
+
         cities_collection.insert_one(city_data)
         flash('City added successfully', 'success')
         return redirect(url_for('super_listing'))
-    
+
     return render_template('super_add_city.html')
+
+
+@app.route('/super_edit_city/<city_id>', methods=['GET', 'POST'])
+@login_required
+@role_required('super_user')
+def super_edit_city(city_id):
+    if current_user.auth_level != 'super_user':
+        flash("Access Denied: You don't have the necessary permissions.", 'danger')
+        return redirect(url_for('login'))
+
+    city = cities_collection.find_one({"_id": ObjectId(city_id)})
+
+    if request.method == 'POST':
+        name = request.form['name']
+        country = request.form['country']
+        description = request.form['description']
+
+        image = request.files.get('image')
+        if image and image.filename:
+            filename = secure_filename(image.filename)
+            image_url = os.path.join(app.config['images'], filename)
+            image.save(image_url)
+            image_path = filename  # Actualizar con el nuevo nombre de archivo
+        else:
+            image_path = city.get('image_url')  # Mantener la imagen actual si no se carga una nueva
+
+        update_data = {
+            'name': name,
+            'country': country,
+            'description': description,
+            'image_url': image_path
+        }
+
+        cities_collection.update_one({"_id": ObjectId(city_id)}, {"$set": update_data})
+        flash('City updated successfully', 'success')
+        return redirect(url_for('super_listing'))
+
+    return render_template('super_edit_city.html', city=city)
+
+
+
 
 @app.route('/super_add_manager', methods=['GET', 'POST'])
 @login_required
@@ -772,32 +823,8 @@ def super_edit_manager(manager_id):
     return render_template('super_edit_manager.html', manager=manager)
 
 
-@app.route('/super_edit_city/<city_id>', methods=['GET', 'POST'])
-@login_required
-@role_required('super_user')
-def super_edit_city(city_id):
-    if current_user.auth_level != 'super_user':
-        flash("Access Denied: You don't have the necessary permissions.", 'danger')
-        return redirect(url_for('login'))
-    
-    city = cities_collection.find_one({"_id": ObjectId(city_id)})
-    
-    if request.method == 'POST':
-        name = request.form['name']
-        country = request.form['country']
-        description = request.form['description']
 
-        update_data = {
-            'name': name,
-            'country': country,
-            'description': description
-        }
-        
-        cities_collection.update_one({"_id": ObjectId(city_id)}, {"$set": update_data})
-        flash('City updated successfully', 'success')
-        return redirect(url_for('super_listing'))
-    
-    return render_template('super_edit_city.html', city=city)
+
 
 @app.route('/delete_manager/<manager_id>', methods=['POST'])
 @login_required
@@ -821,36 +848,27 @@ def delete_city(city_id):
         return redirect(url_for('login'))
     
     try:
-        # Convertir city_id a ObjectId
-        city_id = ObjectId(city_id)
-
-        # Eliminar todos los hoteles asociados a la ciudad
+        # Encontrar todos los hoteles asociados a la ciudad
         hotels = list(db.hotels.find({"address.city_id": city_id}))
         hotel_ids = [hotel['_id'] for hotel in hotels]
-        
-        if hotel_ids:
-            print(f"Hotel IDs to be deleted: {hotel_ids}")  # Depuración
-            
-            # Eliminar las reservas asociadas a los hoteles
-            result_reservations = db.reservations.delete_many({"hotel_id": {"$in": hotel_ids}})
-            print(f"Reservations deleted: {result_reservations.deleted_count}")  # Depuración
 
-            # Eliminar los hoteles
-            result_hotels = db.hotels.delete_many({"_id": {"$in": hotel_ids}})
-            print(f"Hotels deleted: {result_hotels.deleted_count}")  # Depuración
-        
-        # Finalmente, eliminar la ciudad
-        result_city = cities_collection.delete_one({"_id": city_id})
-        if result_city.deleted_count == 0:
-            raise Exception("City not found or could not be deleted.")
+        # Eliminar las reservas asociadas a esos hoteles
+        if hotel_ids:
+            db.reservations.delete_many({"hotel_id": {"$in": hotel_ids}})
+
+        # Eliminar los hoteles asociados a la ciudad
+        if hotel_ids:
+            db.hotels.delete_many({"_id": {"$in": hotel_ids}})
+
+        # Eliminar la ciudad
+        db.cities.delete_one({"_id": ObjectId(city_id)})
 
         flash('City and all associated hotels and reservations deleted successfully!', 'success')
     except Exception as e:
-        # Manejar excepciones y proporcionar retroalimentación
+        # Manejar cualquier excepción y proporcionar retroalimentación
         flash(f'An error occurred: {e}', 'danger')
     
     return redirect(url_for('super_listing'))
-
 
 
 # Rutas de Gestión de Hoteles

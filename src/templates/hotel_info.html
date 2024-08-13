@@ -60,6 +60,13 @@
     }
 </style>
 
+<!-- Bootstrap CSS -->
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+
+
 <div class="container my-5">
     {% if hotel and booking_details %}
     <div class="card mb-5">
@@ -94,7 +101,9 @@
                 <div class="row justify-content-center">
                     {% if hotel.photos %}
                         <div class="col-md-6 mb-3">
-                            <img src="{{ url_for('hotel_photo', photo_id=hotel.photos[0]) }}" alt="Hotel Main Photo" class="img-fluid img-clickable" data-bs-toggle="modal" data-bs-target="#photoModal" onclick="showPhoto('{{ url_for('hotel_photo' ,  photo_id=hotel.photos[0]) }}')">
+                            <a href="{{ url_for('hotel_photo', photo_id=hotel.photos[0]) }}" target="_blank">
+                                <img src="{{ url_for('hotel_photo', photo_id=hotel.photos[0]) }}" alt="Hotel Main Photo" class="img-fluid img-clickable">
+                            </a>
                             <p class="text-center mt-2"><strong>Main Photo</strong></p>
                         </div>
                         <div class="col-md-12">
@@ -102,7 +111,9 @@
                             <div class="row justify-content-center">
                                 {% for photo_id in hotel.photos[1:] %}
                                 <div class="col-md-4 mb-3">
-                                    <img src="{{ url_for('hotel_photo', photo_id=photo_id) }}" alt="Hotel Room Photo" class="img-fluid img-clickable" data-bs-toggle="modal" data-bs-target="#photoModal" onclick="showPhoto('{{ url_for('hotel_photo', photo_id=photo_id) }}')">
+                                    <a href="{{ url_for('hotel_photo', photo_id=photo_id) }}" target="_blank">
+                                        <img src="{{ url_for('hotel_photo', photo_id=photo_id) }}" alt="Hotel Room Photo" class="img-fluid img-clickable">
+                                    </a>
                                 </div>
                                 {% endfor %}
                             </div>
@@ -112,6 +123,7 @@
                     {% endif %}
                 </div>
             </div>
+            
             
             <div class="hotel-info-section">
                 <div>
@@ -184,36 +196,34 @@
 
 <!-- Modal -->
 <div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="photoModalLabel">Hotel Photo</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <img id="modalPhoto" src="" class="img-fluid" alt="Hotel Photo">
-      </div>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="photoModalLabel">Hotel Photo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <img id="modalPhoto" src="" class="img-fluid" alt="Hotel Photo">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
-<!-- Script para actualizar el formulario automáticamente -->
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var updateBookingForm = document.getElementById('update-booking-form');
-        var formElements = updateBookingForm.querySelectorAll('input');
-
-        formElements.forEach(function(element) {
-            element.addEventListener('change', function() {
-                updateBookingForm.submit();
-            });
-        });
-    });
-
-    // Function to show the photo in the modal
-    function showPhoto(photoUrl) {
+    function showPhoto(photoUrl, photoTitle = 'Hotel Photo') {
         var modalPhoto = document.getElementById('modalPhoto');
+        var photoModalLabel = document.getElementById('photoModalLabel');
+        
         modalPhoto.src = photoUrl;
+        photoModalLabel.textContent = photoTitle;
+
+        var photoModal = new bootstrap.Modal(document.getElementById('photoModal'));
+        photoModal.show();
     }
 </script>
+
+
 {% endblock %}

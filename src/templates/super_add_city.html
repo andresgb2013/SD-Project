@@ -7,7 +7,7 @@
     <h2 class="text-center mb-4">Add City</h2>
     <div class="card mb-4">
         <div class="card-body">
-            <form action="{{ url_for('super_add_city') }}" method="POST">
+            <form action="{{ url_for('super_add_city') }}" method="POST" enctype="multipart/form-data">
                 <div class="mb-3">
                     <label for="name" class="form-label">City Name</label>
                     <input type="text" class="form-control" id="name" name="name" required>
@@ -19,6 +19,10 @@
                 <div class="mb-3">
                     <label for="description" class="form-label">Description</label>
                     <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="image" class="form-label">City Image</label>
+                    <input type="file" class="form-control" id="image" name="image" accept="image/*">
                 </div>
                 <button type="submit" class="btn btn-primary">Add City</button>
             </form>
